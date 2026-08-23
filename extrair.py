@@ -176,6 +176,26 @@ def abrir_camadas():
     return camadas
 
 
+def juntar_contendo(camadas, trecho, sufixo=".json"):
+    """
+    Igual ao juntar_por_caminho, mas casa um TRECHO em qualquer lugar do caminho.
+
+    Serve pra quando vários mods usam a mesma estrutura de pasta com nomes
+    diferentes na frente. Exemplo: as mega pedras ficam em
+      data/mega_showdown/mega_showdown/mega/   (mod Mega Showdown)
+      data/zamega/mega_showdown/mega/          (mod ZA Mega, do Legends Z-A)
+    Procurando por "/mega_showdown/mega/" a gente pega as duas.
+    """
+    resultado = {}
+    for z in camadas:
+        for nome in z.namelist():
+            if trecho in nome and nome.endswith(sufixo):
+                dados = ler_json(z, nome)
+                if dados is not None:
+                    resultado[nome] = dados
+    return resultado
+
+
 def juntar_por_caminho(camadas, prefixo, sufixo=".json"):
     """
     Percorre todas as camadas e devolve {caminho: conteúdo}.
@@ -485,7 +505,25 @@ def descrever_requisito(req, textos):
     return str(v).replace("_", " ")
 
 
-def montar_megas(especie):
+def carregar_formas_extras(camadas):
+    """
+    Formas que um mod ADICIONA a um Pokémon que já existe.
+
+    Em vez de reescrever a espécie inteira, o mod cria um arquivo em
+    species_additions dizendo "no Garchomp, acrescente esta forma". É assim que
+    o ZA Mega coloca as megas do Legends Z-A. Quem só lê o arquivo da espécie
+    não enxerga essas formas.
+    """
+    extras = {}
+    for dados in juntar_contendo(camadas, "/species_additions/").values():
+        alvo = (dados.get("target") or "").split(":")[-1].lower()
+        formas = dados.get("forms") or []
+        if alvo and formas:
+            extras.setdefault(alvo, []).extend(formas)
+    return extras
+
+
+def montar_megas(especie, formas_extras):
     """
     As formas Mega de um Pokémon.
 
@@ -494,24 +532,23 @@ def montar_megas(especie):
     X, por exemplo, deixa de ser Voador e vira Dragão.
     """
     megas = []
-    for forma in especie.get("forms") or []:
+    for forma in list(especie.get("forms") or []) + formas_extras:
         nome = forma.get("name") or ""
         if not (nome.startswith("Mega") or nome.startswith("Primal")):
             continue
         if not forma.get("baseStats"):
             continue  # forma sem status é só aparência, não serve pra avaliar
 
-        megas.append(
-            {
-                "nome": nome,
-                "tipos": [
-                    t
-                    for t in (forma.get("primaryType"), forma.get("secondaryType"))
-                    if t
-                ],
-                "stats": forma.get("baseStats"),
-            }
-        )
+        # Quando a forma não declara tipo, é porque ela mantém o do Pokémon
+        # normal — o mod só escreve o que MUDA. Mega Dragonite é assim.
+        tipos = [t for t in (forma.get("primaryType"), forma.get("secondaryType")) if t]
+        if not tipos:
+            tipos = [
+                t for t in (especie.get("primaryType"), especie.get("secondaryType")) if t
+            ]
+
+        megas.append({"nome": nome, "tipos": tipos, "stats": forma.get("baseStats")})
+
     return megas
 
 
@@ -881,36 +918,53 @@ def montar_receita(receita, textos, camadas):
 
 
 def montar_megas_do_pack(camadas, textos):
-    # Todas as receitas, indexadas pelo item que produzem.
+    # As pedras podem vir de mais de um mod. Procurando pelo trecho do caminho,
+    # a gente pega as do Mega Showdown E as do ZA Mega (Legends Z-A).
+    #
+    # Mas o trecho sozinho não basta: as CONQUISTAS do mod ficam em
+    # data/mega_showdown/advancement/mega_showdown/mega/, que também casa.
+    # Por isso a gente exige a forma exata do caminho, com 5 pedaços:
+    #   data / <mod> / mega_showdown / mega / <arquivo>.json
+    arquivos = {
+        caminho: dados
+        for caminho, dados in juntar_contendo(camadas, "/mega_showdown/mega/").items()
+        if len(caminho.split("/")) == 5 and caminho.startswith("data/")
+    }
+
+    # Cada mod tem o seu namespace, e as receitas e ícones dele ficam lá dentro.
+    namespaces = {caminho.split("/")[1] for caminho in arquivos}
+
     receitas = {}
-    for caminho, dados in juntar_por_caminho(camadas, "data/mega_showdown/recipe/").items():
-        resultado = dados.get("result")
-        item_id = resultado.get("id") if isinstance(resultado, dict) else resultado
-        if item_id:
-            receitas[item_id] = dados
+    for namespace in namespaces:
+        for caminho, dados in juntar_por_caminho(camadas, f"data/{namespace}/recipe/").items():
+            resultado = dados.get("result")
+            item_id = resultado.get("id") if isinstance(resultado, dict) else resultado
+            if item_id:
+                receitas[item_id] = dados
 
     pedras = []
-    for caminho, dados in juntar_por_caminho(
-        camadas, "data/mega_showdown/mega_showdown/mega/"
-    ).items():
+    for caminho, dados in arquivos.items():
         # O nome do arquivo é o id do item de verdade (charizardite_x.json).
         # O "showdown_id" de dentro às vezes vem sem o underline, então não serve.
         pedra_id = caminho.split("/")[-1][: -len(".json")]
+        namespace = caminho.split("/")[1]
         if not pedra_id:
             continue
 
         salvar_textura(
             camadas,
-            f"assets/mega_showdown/textures/item/{pedra_id}.png",
+            f"assets/{namespace}/textures/item/{pedra_id}.png",
             AQUI / "img" / "megas" / f"{pedra_id}.png",
         )
 
         pedras.append(
             {
                 "id": pedra_id,
-                "nome": nome_traduzido(f"item.mega_showdown.{pedra_id}", pedra_id, textos),
+                "nome": nome_traduzido(f"item.{namespace}.{pedra_id}", pedra_id, textos),
                 "pokemon": dados.get("pokemons") or [],
-                "receita": montar_receita(receitas.get(f"mega_showdown:{pedra_id}"), textos, camadas),
+                "receita": montar_receita(
+                    receitas.get(f"{namespace}:{pedra_id}"), textos, camadas
+                ),
             }
         )
 
@@ -970,6 +1024,10 @@ def main():
     print("Lendo traduções...")
     textos = carregar_traducoes(camadas)
     print(f"  {len(textos)} textos")
+
+    print("Lendo formas extras que os mods adicionam...")
+    formas_extras = carregar_formas_extras(camadas)
+    print(f"  {len(formas_extras)} pokémon recebem forma de algum mod")
 
     print("Lendo espécies...")
     especies_por_caminho = juntar_por_caminho(camadas, "data/cobblemon/species/")
@@ -1042,7 +1100,7 @@ def main():
                 "peso": especie.get("weight"),
                 "preEvolucao": (especie.get("preEvolution") or "").split(" ")[0] or None,
                 "evolucoes": montar_evolucoes(especie, textos),
-                "megas": montar_megas(especie),
+                "megas": montar_megas(especie, formas_extras.get(chave, [])),
                 "descricao": textos.get(
                     (especie.get("pokedex") or [""])[0], ""
                 ),
