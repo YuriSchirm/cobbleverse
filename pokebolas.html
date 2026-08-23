@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokébolas — COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo">
+    <a class="marca" href="index.html">COBBLE<span>VERSE</span></a>
+    <nav class="menu">
+      <a href="index.html">Pokédex</a>
+      <a href="builds.html">Builds</a>
+      <a href="tipos.html">Tipos</a>
+      <a href="pokebolas.html" class="ativo">Pokébolas</a>
+      <a href="megas.html">Megas</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Qual pokébola usar</h1>
+    <p class="contagem">
+      O número é quanto a bola multiplica sua chance de captura.
+      Uma bola de 4× na situação certa vale mais que uma Ultra Ball.
+    </p>
+
+    <section class="painel destaque">
+      <h2>Regra rápida</h2>
+      <ul class="lista">
+        <li><strong>Achou agora?</strong> Quick Ball — 5× no primeiro turno.</li>
+        <li><strong>Passou o 1º turno?</strong> Ultra Ball resolve quase tudo.</li>
+        <li><strong>Tá numa caverna ou de noite?</strong> Dusk Ball.</li>
+        <li><strong>Pescou?</strong> Lure Ball, 4× garantido.</li>
+        <li><strong>Lendário?</strong> Master Ball, sem pensar duas vezes.</li>
+      </ul>
+    </section>
+
+    <div id="bolas"></div>
+  </main>
+
+  <script src="dados/dados.js"></script>
+  <script src="js/pagina-bolas.js"></script>
+</body>
+</html>

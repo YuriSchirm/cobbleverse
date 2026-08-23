@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Megaevoluções — COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo">
+    <a class="marca" href="index.html">COBBLE<span>VERSE</span></a>
+    <nav class="menu">
+      <a href="index.html">Pokédex</a>
+      <a href="builds.html">Builds</a>
+      <a href="tipos.html">Tipos</a>
+      <a href="pokebolas.html">Pokébolas</a>
+      <a href="megas.html" class="ativo">Megas</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Megaevoluções</h1>
+
+    <section class="painel">
+      <h2>Como conseguir, do zero</h2>
+      <ol class="passos" id="guia"></ol>
+    </section>
+
+    <section class="painel">
+      <h2>Itens base</h2>
+      <p class="detalhes">Você precisa destes antes de qualquer mega pedra.</p>
+      <div class="lista-itens" id="base"></div>
+    </section>
+
+    <h2 class="titulo-tabela">Todas as mega pedras</h2>
+    <input type="search" id="busca-mega" placeholder="Buscar por Pokémon ou pedra..." autocomplete="off">
+    <p class="contagem" id="contagem-mega"></p>
+    <div class="lista-itens" id="pedras"></div>
+  </main>
+
+  <script src="dados/dados.js"></script>
+  <script src="js/pagina-megas.js"></script>
+</body>
+</html>

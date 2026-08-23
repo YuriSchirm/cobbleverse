@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokédex COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo">
+    <a class="marca" href="index.html">COBBLE<span>VERSE</span></a>
+    <nav class="menu">
+      <a href="index.html" class="ativo">Pokédex</a>
+      <a href="builds.html">Builds</a>
+      <a href="tipos.html">Tipos</a>
+      <a href="pokebolas.html">Pokébolas</a>
+      <a href="megas.html">Megas</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="filtros">
+      <input type="search" id="busca" placeholder="Buscar Pokémon pelo nome ou número..." autocomplete="off">
+
+      <div class="selects">
+        <select id="filtro-tipo">
+          <option value="">Todos os tipos</option>
+        </select>
+
+        <select id="filtro-raridade">
+          <option value="">Todas as raridades</option>
+          <option value="common">Comum</option>
+          <option value="uncommon">Incomum</option>
+          <option value="rare">Raro</option>
+          <option value="ultra-rare">Ultra raro</option>
+          <option value="nenhuma">Não aparece na natureza</option>
+        </select>
+
+        <select id="filtro-geracao">
+          <option value="">Todas as gerações</option>
+        </select>
+      </div>
+
+      <p class="contagem" id="contagem">Carregando...</p>
+    </section>
+
+    <section class="grade" id="grade"></section>
+  </main>
+
+  <script src="dados/dados.js"></script>
+  <script src="js/tipos.js"></script>
+  <script src="js/dex.js"></script>
+</body>
+</html>

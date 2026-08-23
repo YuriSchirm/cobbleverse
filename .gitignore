@@ -1,0 +1,10 @@
+# O zip é gerado pelo criar-zip.py — não precisa ficar guardado no repositório.
+cobbleverse.zip
+
+# Cópia do site já descompactada aqui dentro — é a mesma coisa da raiz.
+cobbleversesite/
+
+# Lixo do Windows e dos editores.
+Thumbs.db
+desktop.ini
+.vscode/

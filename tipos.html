@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tipos e fraquezas — COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo">
+    <a class="marca" href="index.html">COBBLE<span>VERSE</span></a>
+    <nav class="menu">
+      <a href="index.html">Pokédex</a>
+      <a href="builds.html">Builds</a>
+      <a href="tipos.html" class="ativo">Tipos</a>
+      <a href="pokebolas.html">Pokébolas</a>
+      <a href="megas.html">Megas</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Quem é bom contra quem</h1>
+
+    <section class="painel">
+      <h2>Meu Pokémon é do tipo...</h2>
+      <div class="selects">
+        <select id="tipo1"></select>
+        <select id="tipo2">
+          <option value="">(sem segundo tipo)</option>
+        </select>
+      </div>
+      <div id="resultado"></div>
+    </section>
+
+    <h2 class="titulo-tabela">Tabela completa</h2>
+    <p class="contagem">
+      A linha é quem <strong>ataca</strong>, a coluna é quem <strong>defende</strong>.
+      Arraste pro lado se não couber na tela.
+    </p>
+    <div class="rolagem">
+      <table id="tabela"></table>
+    </div>
+  </main>
+
+  <script src="js/tipos.js"></script>
+  <script src="js/pagina-tipos.js"></script>
+</body>
+</html>

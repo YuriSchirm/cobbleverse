@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Builds — COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo">
+    <a class="marca" href="index.html">COBBLE<span>VERSE</span></a>
+    <nav class="menu">
+      <a href="index.html">Pokédex</a>
+      <a href="builds.html" class="ativo">Builds</a>
+      <a href="tipos.html">Tipos</a>
+      <a href="pokebolas.html">Pokébolas</a>
+      <a href="megas.html">Megas</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Monte seu time</h1>
+    <p class="contagem">Escolha até 6 Pokémon e o site diz onde o time tem furo.</p>
+
+    <section class="slots" id="slots"></section>
+
+    <div class="acoes">
+      <button type="button" id="limpar" class="botao-fraco">Limpar time</button>
+    </div>
+
+    <section id="avaliacao"></section>
+  </main>
+
+  <dialog id="seletor">
+    <div class="seletor-topo">
+      <input type="search" id="busca-time" placeholder="Buscar por nome ou número..." autocomplete="off">
+      <button type="button" id="fechar" class="botao-fraco">Fechar</button>
+    </div>
+    <p class="contagem" id="contagem-seletor"></p>
+    <div class="resultados" id="resultados"></div>
+  </dialog>
+
+  <script src="dados/dados.js"></script>
+  <script src="js/tipos.js"></script>
+  <script src="js/avaliar.js"></script>
+  <script src="js/builds.js"></script>
+</body>
+</html>

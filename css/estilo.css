@@ -1,0 +1,623 @@
+/*
+  Visual do site.
+
+  Ideia: você está numa caverna de deepslate (onde ficam os Megasites, entre
+  Y 5 e Y 20). Tudo é pedra fria, e a única cor quente é a da tocha.
+  A raridade usa cor de minério: pedra < cobre < lápis < diamante.
+*/
+
+:root {
+  --fundo: #171a1f;
+  --pedra: #21262e;
+  --pedra-alta: #2a303a;
+  --borda: #333b46;
+  --texto: #e6e8ec;
+  --texto-fraco: #98a0ac;
+  --tocha: #f2a65a;
+  --perigo: #e5674b;
+  --bom: #6fbf73;
+
+  /* A escada de raridade, em cor de minério. */
+  --rar-common: #8a939e;
+  --rar-uncommon: #c97f4a;
+  --rar-rare: #4a8fd4;
+  --rar-ultra-rare: #4adec4;
+  --rar-nenhuma: #5a6270;
+
+  --fonte-titulo: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --fonte-texto: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --fonte-dados: "IBM Plex Mono", ui-monospace, monospace;
+
+  --canto: 4px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 30px; margin: 0 0 4px; }
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--tocha);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- topo */
+
+.topo {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 14px 24px;
+  background: var(--pedra);
+  border-bottom: 1px solid var(--borda);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.marca {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  /* A veia de tocha na marca: mesma linguagem visual dos cards. */
+  border-left: 4px solid var(--tocha);
+  padding-left: 10px;
+}
+.marca span { color: var(--tocha); }
+
+.menu { display: flex; gap: 18px; flex-wrap: wrap; }
+.menu a { color: var(--texto-fraco); font-size: 14px; padding: 2px 0; }
+.menu a:hover { color: var(--texto); }
+.menu a.ativo { color: var(--tocha); border-bottom: 2px solid var(--tocha); }
+
+main { padding: 24px; max-width: 1180px; margin: 0 auto; }
+
+/* ------------------------------------------------------------- filtros */
+
+.filtros { display: grid; gap: 10px; margin: 16px 0 22px; }
+
+input, select {
+  padding: 10px 12px;
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 15px;
+}
+input:hover, select:hover { border-color: var(--texto-fraco); }
+
+.selects { display: flex; gap: 10px; flex-wrap: wrap; }
+.selects select { flex: 1 1 160px; }
+
+.contagem {
+  margin: 0;
+  color: var(--texto-fraco);
+  font-family: var(--fonte-dados);
+  font-size: 13px;
+}
+
+/* ----------------------------------------------------- grade da Pokédex */
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  position: relative;
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 12px 12px 12px 18px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+/* A VEIA: faixa de minério na lateral. É a assinatura do site. */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--veia, var(--rar-nenhuma));
+}
+
+.r-common { --veia: var(--rar-common); }
+.r-uncommon { --veia: var(--rar-uncommon); }
+.r-rare { --veia: var(--rar-rare); }
+.r-ultra-rare { --veia: var(--rar-ultra-rare); }
+
+.card:hover { border-color: var(--tocha); background: var(--pedra-alta); }
+
+.card img { width: 80px; height: 80px; image-rendering: pixelated; margin: 2px 0; }
+.card h2 { margin: 0; font-size: 16px; }
+
+.numero { font-family: var(--fonte-dados); font-size: 12px; color: var(--texto-fraco); }
+
+.tipos { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.tipo {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 2px;
+  color: #14161c;
+}
+
+.raridade {
+  font-family: var(--fonte-dados);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rar-nenhuma);
+}
+.raridade-common { color: var(--rar-common); }
+.raridade-uncommon { color: var(--rar-uncommon); }
+.raridade-rare { color: var(--rar-rare); }
+.raridade-ultra-rare { color: var(--rar-ultra-rare); }
+
+.vazio, .nada { color: var(--texto-fraco); }
+
+/* ------------------------------------------------------ ficha do Pokémon */
+
+.voltar { display: inline-block; margin-bottom: 18px; color: var(--texto-fraco); font-size: 14px; }
+.voltar:hover { color: var(--tocha); }
+
+.cabecalho {
+  display: flex;
+  gap: 26px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  padding-left: 18px;
+  border-left: 5px solid var(--tocha);
+}
+.cabecalho img { width: 150px; height: 150px; image-rendering: pixelated; }
+.cabecalho h1 { margin: 2px 0 8px; font-size: 34px; }
+.cabecalho .raridade { display: block; margin: 8px 0; }
+.descricao { max-width: 58ch; color: var(--texto-fraco); margin: 8px 0 0; }
+
+.paineis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  align-items: start;
+}
+
+.painel {
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 16px 18px;
+}
+.painel h2 { margin: 0 0 12px; font-size: 17px; }
+.painel h3 {
+  margin: 16px 0 6px;
+  font-size: 12px;
+  font-family: var(--fonte-texto);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--texto-fraco);
+}
+.painel h3.perigo { color: var(--perigo); }
+.painel h3.bom { color: var(--bom); }
+.painel p { font-size: 14px; }
+.painel a { color: var(--tocha); text-decoration: underline; text-underline-offset: 2px; }
+
+.linha-tipos { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.aviso {
+  background: #2e2119;
+  border-left: 3px solid var(--perigo);
+  padding: 9px 12px;
+  border-radius: var(--canto);
+  font-size: 14px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Barras de status: leitura de instrumento, por isso número monoespaçado. */
+.stat {
+  display: grid;
+  grid-template-columns: 104px 38px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.stat-nome { color: var(--texto-fraco); }
+.stat-valor { text-align: right; font-family: var(--fonte-dados); }
+.stat-barra { background: var(--fundo); height: 7px; border-radius: 2px; overflow: hidden; }
+.stat-barra i { display: block; height: 100%; background: var(--tocha); }
+.total { margin: 12px 0 0; color: var(--texto-fraco); font-family: var(--fonte-dados); font-size: 13px; }
+
+.local { border-top: 1px solid var(--borda); padding-top: 12px; margin-top: 12px; }
+.local:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.local-topo {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: var(--fonte-dados);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.grupos { display: flex; gap: 5px; flex-wrap: wrap; }
+.grupo {
+  background: var(--pedra-alta);
+  border: 1px solid var(--borda);
+  padding: 2px 9px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+.detalhes { font-size: 13px; color: var(--texto-fraco); margin: 8px 0 0; }
+.biomas { font-size: 12px; color: var(--texto-fraco); line-height: 1.7; margin: 6px 0 0; }
+
+summary { cursor: pointer; font-size: 13px; color: var(--texto-fraco); margin-top: 8px; }
+summary:hover { color: var(--tocha); }
+
+.evo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--borda);
+  padding-top: 10px;
+  margin: 10px 0 0;
+}
+.evo a { display: flex; gap: 8px; align-items: center; }
+.evo a:hover { color: var(--tocha); }
+.evo img { width: 44px; height: 44px; image-rendering: pixelated; }
+.evo span { font-size: 13px; color: var(--texto-fraco); }
+
+.lista { padding-left: 18px; margin: 0 0 12px; font-size: 14px; }
+
+/* -------------------------------------------------------- tabela de tipos */
+
+.titulo-tabela { margin-top: 34px; }
+
+.rolagem {
+  overflow-x: auto;
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  margin-top: 10px;
+}
+table { border-collapse: collapse; font-size: 11px; width: 100%; }
+th, td { padding: 6px 4px; text-align: center; white-space: nowrap; }
+th.vertical { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+th.lateral {
+  color: #14161c;
+  text-align: left;
+  padding-left: 10px;
+  position: sticky;
+  left: 0;
+  font-weight: 700;
+}
+.celula { border: 1px solid var(--fundo); font-family: var(--fonte-dados); font-weight: 600; color: #14161c; }
+.celula.forte { background: var(--bom); }
+.celula.fraco { background: var(--perigo); }
+.celula.zero { background: #4a4a55; color: var(--texto); }
+
+/* ------------------------------------------------------------ pokébolas */
+
+.destaque { border-left: 5px solid var(--tocha); }
+.lista-bolas { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.bola { display: flex; gap: 12px; align-items: flex-start; }
+.bola img { width: 36px; height: 36px; image-rendering: pixelated; flex-shrink: 0; }
+.bola h3 { margin: 0 0 3px; font-size: 15px; color: var(--texto); }
+.efeito {
+  font-family: var(--fonte-dados);
+  background: var(--tocha);
+  color: #14161c;
+  padding: 1px 7px;
+  border-radius: 2px;
+  font-size: 12px;
+  margin-left: 4px;
+}
+.quando { margin: 0 0 4px; font-size: 13px; color: var(--texto-fraco); }
+.dica { margin: 0 0 4px; font-size: 13px; }
+.receita-texto { margin: 0; font-size: 12px; color: var(--texto-fraco); }
+
+/* ----------------------------------------------------------------- megas */
+
+.passos { padding-left: 20px; margin: 0; }
+.passos li { margin-bottom: 12px; font-size: 14px; }
+.passos strong { color: var(--tocha); }
+
+.lista-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+
+.item-mega {
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 12px;
+}
+.item-mega header { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.item-mega img { width: 26px; height: 26px; image-rendering: pixelated; }
+.item-mega h3 { margin: 0; font-size: 14px; }
+.para-quem { margin: 0 0 8px; font-size: 13px; color: var(--tocha); }
+
+/* A grade do craft, igual à bancada do jogo. */
+.craft { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+.slot {
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 2px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  overflow: hidden;
+}
+.slot.cheio { background: var(--pedra-alta); }
+.slot img {
+  width: 100%;
+  max-width: 34px;
+  height: auto;
+  /* Textura de 16x16 pixels: sem isso o navegador borra tudo ao ampliar. */
+  image-rendering: pixelated;
+}
+.so-texto { font-size: 9px; line-height: 1.15; text-align: center; }
+.ingredientes { margin: 7px 0 0; font-size: 11px; color: var(--texto-fraco); line-height: 1.5; }
+
+#busca-mega { width: 100%; margin: 10px 0 6px; }
+
+/* ------------------------------------------------------------ responsivo */
+
+@media (max-width: 620px) {
+  main { padding: 16px; }
+  h1 { font-size: 24px; }
+  .topo { gap: 14px; padding: 12px 16px; }
+  .cabecalho { gap: 16px; }
+  .cabecalho img { width: 110px; height: 110px; }
+  .cabecalho h1 { font-size: 26px; }
+  .grade { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .stat { grid-template-columns: 88px 34px 1fr; }
+}
+
+/* Quem pediu menos movimento no sistema não recebe transição nenhuma. */
+@media (prefers-reduced-motion: no-preference) {
+  .card, .menu a, .voltar { transition: 120ms ease; }
+}
+
+
+/* ----------------------------------------------------------------- builds */
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.slot-time {
+  position: relative;
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 12px 12px 12px 18px;
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 15px;
+  text-align: left;
+}
+.slot-time::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--veia, var(--borda));
+}
+
+.slot-time.vazio {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 190px;
+  border-style: dashed;
+  color: var(--texto-fraco);
+  cursor: pointer;
+}
+.slot-time.vazio:hover { border-color: var(--tocha); color: var(--texto); }
+.mais { font-size: 26px; font-family: var(--fonte-titulo); }
+
+.slot-time.cheio { display: grid; gap: 5px; justify-items: start; }
+.slot-time.cheio img { width: 84px; height: 84px; image-rendering: pixelated; }
+.slot-time.cheio h3 { margin: 0; font-size: 16px; }
+.slot-time .numero { margin: 0; }
+.slot-time .raridade { margin: 0; }
+
+.tirar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: none;
+  border: 0;
+  color: var(--texto-fraco);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.tirar:hover { color: var(--perigo); background: var(--pedra-alta); }
+
+.mega { display: grid; gap: 3px; width: 100%; margin-top: 4px; }
+.mega span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tocha); }
+.mega select { padding: 6px 8px; font-size: 13px; width: 100%; }
+.sem-mega { margin: 4px 0 0; font-size: 11px; color: var(--texto-fraco); }
+
+.botao-fraco {
+  background: var(--pedra-alta);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.botao-fraco:hover { border-color: var(--tocha); color: var(--tocha); }
+.trocar { width: 100%; margin-top: 4px; }
+.acoes { margin-bottom: 22px; }
+
+/* ---- o resultado da avaliação ---- */
+
+.resultado { border-left: 5px solid var(--tocha); margin-bottom: 12px; }
+
+.veredito { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+.nota-geral {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+  font-size: 54px;
+  line-height: 1;
+  color: var(--tocha);
+}
+.veredito h2 { margin: 0 0 2px; }
+.veredito p { margin: 0; color: var(--texto-fraco); }
+
+.nota {
+  display: grid;
+  grid-template-columns: 96px 38px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.nota-rotulo { color: var(--texto-fraco); }
+.nota-valor { text-align: right; font-family: var(--fonte-dados); }
+.nota-barra { background: var(--fundo); height: 7px; border-radius: 2px; overflow: hidden; }
+.nota-barra i { display: block; height: 100%; }
+.nota-barra i.boa { background: var(--bom); }
+.nota-barra i.media { background: var(--tocha); }
+.nota-barra i.ruim { background: var(--perigo); }
+.nota-explica { grid-column: 3; font-size: 11px; color: var(--texto-fraco); margin-top: -4px; }
+
+.ressalva {
+  margin: 18px 0 0;
+  padding: 9px 12px;
+  background: var(--fundo);
+  border-radius: var(--canto);
+  font-size: 12px;
+  color: var(--texto-fraco);
+}
+
+/* ---- os problemas ---- */
+
+.problema {
+  border-left: 3px solid var(--borda);
+  padding: 2px 0 2px 14px;
+  margin-bottom: 20px;
+}
+.problema.grave { border-left-color: var(--perigo); }
+.problema.atencao { border-left-color: var(--tocha); }
+.problema.dica { border-left-color: var(--texto-fraco); }
+.problema h3 { margin: 0 0 4px; font-size: 16px; }
+.problema p { margin: 0 0 6px; }
+
+.sugestoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-top: 8px; }
+.sugestao {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 8px 10px;
+}
+.sugestao img { width: 52px; height: 52px; image-rendering: pixelated; }
+.sugestao h4 { margin: 0 0 3px; font-family: var(--fonte-titulo); font-size: 14px; }
+.sugestao > div { flex: 1; min-width: 0; }
+.motivos { margin: 4px 0 2px; font-size: 11px; color: var(--bom); }
+
+/* ---- a janela de escolher Pokémon ---- */
+
+#seletor {
+  background: var(--pedra);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 18px;
+  width: min(760px, 92vw);
+  max-height: 82vh;
+}
+#seletor::backdrop { background: rgba(10, 12, 15, 0.75); }
+
+.seletor-topo { display: flex; gap: 8px; margin-bottom: 8px; }
+.seletor-topo input { flex: 1; }
+
+.resultados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 56vh;
+  overflow-y: auto;
+}
+
+.achado {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 8px 8px 8px 12px;
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  cursor: pointer;
+}
+.achado::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--veia, var(--rar-nenhuma));
+}
+.achado:hover { border-color: var(--tocha); }
+.achado img { width: 56px; height: 56px; image-rendering: pixelated; }
+.achado .nome { font-size: 13px; }
+.tem-mega {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tocha);
+}
+
+@media (max-width: 620px) {
+  .nota { grid-template-columns: 80px 32px 1fr; }
+  .nota-geral { font-size: 42px; }
+}
