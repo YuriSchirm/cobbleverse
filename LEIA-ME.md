@@ -39,8 +39,8 @@ Se você mudar a instância de lugar, ajuste os caminhos no topo do `extrair.py`
 O VS Code traz um Node por dentro, então dá pra testar sem instalar nada:
 
 ```
-ELECTRON_RUN_AS_NODE=1 "C:/Users/Yuri/AppData/Local/Programs/Microsoft VS Code/Code.exe" teste-avaliacao.js
-ELECTRON_RUN_AS_NODE=1 "C:/Users/Yuri/AppData/Local/Programs/Microsoft VS Code/Code.exe" teste-paginas.js
+ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste-avaliacao.js
+ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste-paginas.js
 ```
 
 - `teste-avaliacao.js` — 19 conferências nas contas da nota do time.

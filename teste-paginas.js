@@ -6,7 +6,7 @@
   se algum estourou erro. Não checa se ficou bonito — checa se não quebrou.
 
   Roda com:
-    ELECTRON_RUN_AS_NODE=1 "C:/Users/Yuri/AppData/Local/Programs/Microsoft VS Code/Code.exe" teste-paginas.js
+    ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste-paginas.js
 */
 
 const fs = require("fs");

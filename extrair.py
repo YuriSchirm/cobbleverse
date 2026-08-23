@@ -18,18 +18,20 @@ from pathlib import Path
 
 # ---------------------------------------------------------------- configuração
 
-INSTANCIA = Path(
-    r"C:\Users\Yuri\curseforge\minecraft\Instances\COBBLEVERSE - Pokemon Adventure [Cobblemon]"
-)
-JAR_MINECRAFT = Path(
-    r"C:\Users\Yuri\curseforge\minecraft\Install\versions\1.21.1\1.21.1.jar"
-)
+# Path.home() é a sua pasta de usuário (C:\Users\seunome no Windows). Usando
+# ela em vez do caminho escrito à mão, o script funciona em qualquer PC — e o
+# nome de ninguém fica escrito no código.
+CASA = Path.home()
+
+INSTANCIA = CASA / "curseforge/minecraft/Instances/COBBLEVERSE - Pokemon Adventure [Cobblemon]"
+JAR_MINECRAFT = CASA / "curseforge/minecraft/Install/versions/1.21.1/1.21.1.jar"
+
 # O Minecraft não guarda as traduções dentro do .jar: ficam soltas numa pasta
 # "assets", com nome de arquivo trocado por um código (hash). Um índice diz
 # qual código corresponde a qual idioma.
 PASTAS_ASSETS = [
-    Path(r"C:\Users\Yuri\AppData\Roaming\.minecraft\assets"),
-    Path(r"C:\Users\Yuri\curseforge\minecraft\Install\assets"),
+    CASA / "AppData/Roaming/.minecraft/assets",
+    CASA / "curseforge/minecraft/Install/assets",
 ]
 
 AQUI = Path(__file__).parent

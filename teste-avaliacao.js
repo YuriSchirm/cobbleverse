@@ -3,7 +3,7 @@
 
   Roda sem navegador, usando o Node que vem dentro do VS Code:
 
-    ELECTRON_RUN_AS_NODE=1 "C:/Users/Yuri/AppData/Local/Programs/Microsoft VS Code/Code.exe" teste-avaliacao.js
+    ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste-avaliacao.js
 
   Serve pra conferir que mexer nas notas não quebrou nada. Se você mudar os
   pesos em js/avaliar.js, rode isto: as comparações têm que continuar valendo.
