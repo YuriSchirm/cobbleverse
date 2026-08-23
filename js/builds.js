@@ -16,14 +16,6 @@ let TODOS = [];
 let time = []; // cada item: { pokemon, mega: null ou o número da forma }
 let slotEmEdicao = null;
 
-function imagemDo(dex) {
-  return (
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" +
-    dex +
-    ".png"
-  );
-}
-
 function etiquetasDeTipo(tipos) {
   return tipos
     .map(

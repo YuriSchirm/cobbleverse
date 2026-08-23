@@ -989,27 +989,374 @@ def montar_megas_do_pack(camadas, textos):
     return {"guia": GUIA_MEGA, "base": base, "pedras": pedras}
 
 
-def montar_arquivo_js(pokemon, bolas, megas):
+def escrever_js(nome_arquivo, blocos):
     """
-    Grava os dados como JavaScript em vez de JSON.
+    Grava dados como JavaScript em vez de JSON.
 
     Por quê: quando a página é aberta com dois cliques (endereço file://), o
     navegador proíbe ela de ler outros arquivos do disco por fetch() — é uma
     regra de segurança. Uma tag <script> não tem essa limitação. Guardando os
     dados como JavaScript, o site funciona sem servidor nenhum, e dá pra
     mandar a pasta zipada pra alguém.
+
+    São vários arquivos, um por assunto, pra cada página carregar só o que
+    usa. A Pokédex não tem por que baixar 6000 receitas de craft.
     """
+    texto = "/* Gerado pelo extrair.py. Não edite à mão: rode o script de novo. */\n"
+    for nome, valor in blocos.items():
+        corpo = json.dumps(valor, ensure_ascii=False, separators=(",", ":"))
+        texto += f"const {nome} = {corpo};\n"
 
-    def bloco(nome, valor):
-        texto = json.dumps(valor, ensure_ascii=False, separators=(",", ":"))
-        return f"const {nome} = {texto};\n"
+    PASTA_DADOS.mkdir(parents=True, exist_ok=True)
+    caminho = PASTA_DADOS / nome_arquivo
+    caminho.write_text(texto, encoding="utf-8")
+    return caminho.stat().st_size
 
-    return (
-        "/* Gerado pelo extrair.py. Não edite à mão: rode o script de novo. */\n"
-        + bloco("DADOS_POKEMON", pokemon)
-        + bloco("DADOS_BOLAS", bolas)
-        + bloco("DADOS_MEGAS", megas)
-    )
+
+# ==========================================================================
+#  PATCH GRANDE: Z-Moves, formas, raids, treinadores, TMs, itens e crafts
+# ==========================================================================
+
+
+def carregar_tags_de_item(camadas):
+    """
+    As tags de ITEM do Cobblemon já são as categorias prontas que a gente quer:
+    berries, apricorns, evolution_items, held/is_held_item, poke_rods...
+    Mesma ideia das tags de bioma, outra pasta.
+    """
+    tags = {}
+    for z in camadas:
+        for nome in z.namelist():
+            if "/tags/item/" not in nome or not nome.endswith(".json"):
+                continue
+            partes = nome.split("/")
+            namespace = partes[1]
+            caminho = nome.split("/tags/item/")[-1][: -len(".json")]
+            chave = f"{namespace}:{caminho}"
+
+            dados = ler_json(z, nome)
+            if dados is None:
+                continue
+
+            valores = [
+                v["id"] if isinstance(v, dict) else v for v in dados.get("values", [])
+            ]
+            if dados.get("replace") or chave not in tags:
+                tags[chave] = valores
+            else:
+                tags[chave] = tags[chave] + valores
+    return tags
+
+
+def itens_da_tag(referencia, tags, ja_vistas=None):
+    """Abre uma tag de item na lista de itens de verdade (recursivo, como os biomas)."""
+    if ja_vistas is None:
+        ja_vistas = set()
+    if not referencia.startswith("#"):
+        return [referencia]
+
+    chave = referencia[1:]
+    if chave in ja_vistas:
+        return []
+    ja_vistas.add(chave)
+
+    itens = []
+    for valor in tags.get(chave, []):
+        itens.extend(itens_da_tag(valor, tags, ja_vistas))
+    return itens
+
+
+def montar_item(item_id, camadas, textos):
+    """Um item pronto pro site: id, nome em português e ícone."""
+    return {
+        "id": item_id,
+        "nome": nome_de_item(item_id, textos),
+        "icone": icone_do_item(camadas, item_id),
+    }
+
+
+# --- categorias de item que viram página ---------------------------------
+# (título da página, tag do Cobblemon, explicação curta)
+CATEGORIAS_DE_ITEM = [
+    ("berries", "Berries", "#cobblemon:berries", "Curam, mudam status e servem pra plantar."),
+    ("apricorns", "Apricorns", "#cobblemon:apricorns", "A base de toda pokébola artesanal."),
+    ("evolucao", "Itens de evolução", "#cobblemon:evolution_items", "Pedras e itens que fazem evoluir."),
+    ("segurados", "Itens segurados", "#cobblemon:held/is_held_item", "O Pokémon segura e ganha um efeito."),
+    ("pesca", "Pesca", "#cobblemon:poke_rods", "Varas, iscas e o que dá pra fisgar."),
+    ("vitaminas", "Vitaminas e remédios", "#cobblemon:vitamins", "Sobem EV e curam."),
+    ("mints", "Mints", "#cobblemon:mints", "Mudam a natureza do Pokémon."),
+    ("gems", "Gemas de tipo", "#cobblemon:type_gems", "Turbinam um golpe do tipo, uma vez."),
+]
+
+
+def montar_itens(camadas, textos):
+    """Junta as categorias de item, cada uma virando uma página."""
+    tags = carregar_tags_de_item(camadas)
+    categorias = []
+
+    for chave, titulo, tag, explicacao in CATEGORIAS_DE_ITEM:
+        ids = []
+        for item_id in itens_da_tag(tag, tags):
+            if item_id not in ids:
+                ids.append(item_id)
+
+        itens = [montar_item(i, camadas, textos) for i in sorted(ids)]
+        itens = [i for i in itens if i["nome"]]
+
+        categorias.append(
+            {"chave": chave, "titulo": titulo, "explicacao": explicacao, "itens": itens}
+        )
+
+    return categorias
+
+
+# --- Z-Moves --------------------------------------------------------------
+
+# Os cristais de tipo dão o golpe Z daquele tipo. O mod só guarda o id e a cor,
+# então o tipo sai do próprio nome do item (firium_z -> fire).
+TIPO_DO_CRISTAL = {
+    "firium": "fire", "waterium": "water", "grassium": "grass",
+    "electrium": "electric", "icium": "ice", "fightinium": "fighting",
+    "poisonium": "poison", "groundium": "ground", "flyinium": "flying",
+    "psychium": "psychic", "buginium": "bug", "rockium": "rock",
+    "ghostium": "ghost", "dragonium": "dragon", "darkinium": "dark",
+    "steelium": "steel", "fairium": "fairy", "normalium": "normal",
+}
+
+# Os exclusivos: cristal -> Pokémon que pode usar.
+DONO_DO_CRISTAL = {
+    "aloraichium": "Raichu de Alola", "decidium": "Decidueye",
+    "eevium": "Eevee", "incinium": "Incineroar", "kommonium": "Kommo-o",
+    "lunalium": "Lunala", "lycanium": "Lycanroc", "marshadium": "Marshadow",
+    "mewnium": "Mew", "mimikium": "Mimikyu", "pikanium": "Pikachu",
+    "pikashunium": "Pikachu com boné do Ash", "primarium": "Primarina",
+    "snorlium": "Snorlax", "solganium": "Solgaleo", "tapunium": "Tapu",
+    "ultranecrozium": "Necrozma", "zygardium": "Zygarde",
+}
+
+
+def montar_zmoves(camadas, textos):
+    """Os cristais Z: qual tipo, quem usa e como conseguir."""
+    arquivos = {
+        c: d
+        for c, d in juntar_contendo(camadas, "/z_crystal_item/").items()
+        if len(c.split("/")) == 5 and c.startswith("data/")
+    }
+
+    namespaces = {c.split("/")[1] for c in arquivos}
+    receitas = {}
+    for namespace in namespaces:
+        for caminho, dados in juntar_por_caminho(camadas, f"data/{namespace}/recipe/").items():
+            resultado = dados.get("result")
+            item_id = resultado.get("id") if isinstance(resultado, dict) else resultado
+            if item_id:
+                receitas[item_id] = dados
+
+    cristais = []
+    for caminho, dados in arquivos.items():
+        cristal_id = caminho.split("/")[-1][: -len(".json")]
+        namespace = caminho.split("/")[1]
+        raiz = cristal_id.replace("_z", "")
+
+        salvar_textura(
+            camadas,
+            f"assets/{namespace}/textures/item/{cristal_id}.png",
+            AQUI / "img" / "zmoves" / f"{cristal_id}.png",
+        )
+
+        cristais.append(
+            {
+                "id": cristal_id,
+                "nome": nome_traduzido(f"item.{namespace}.{cristal_id}", cristal_id, textos),
+                "tipo": TIPO_DO_CRISTAL.get(raiz),
+                "dono": DONO_DO_CRISTAL.get(raiz),
+                "cor": dados.get("color"),
+                "receita": montar_receita(receitas.get(f"{namespace}:{cristal_id}"), textos, camadas),
+            }
+        )
+
+    cristais.sort(key=lambda c: (c["dono"] is not None, c["nome"]))
+    return cristais
+
+
+# --- formas de batalha (Gigantamax, Primal, Arceus...) --------------------
+
+
+def montar_formas(camadas, textos):
+    arquivos = {
+        c: d
+        for c, d in juntar_contendo(camadas, "/battle_form/").items()
+        if len(c.split("/")) == 5 and c.startswith("data/")
+    }
+
+    formas = []
+    for caminho, dados in arquivos.items():
+        forma_id = caminho.split("/")[-1][: -len(".json")]
+        donos = dados.get("pokemons") or []
+        if not donos:
+            continue
+
+        formas.append(
+            {
+                "id": forma_id,
+                "pokemon": donos,
+                "forma": (dados.get("showdown_form_change_id") or "").replace("_", " "),
+                "item": nome_de_item(dados.get("effect"), textos) if dados.get("effect") else None,
+            }
+        )
+
+    formas.sort(key=lambda f: (f["pokemon"][0], f["forma"]))
+    return formas
+
+
+# --- raids ----------------------------------------------------------------
+
+TIERS = {
+    "TIER_ONE": 1, "TIER_TWO": 2, "TIER_THREE": 3, "TIER_FOUR": 4,
+    "TIER_FIVE": 5, "TIER_SIX": 6, "TIER_SEVEN": 7,
+}
+
+
+def montar_raids(camadas, textos, dex_por_especie):
+    """Cada raid diz qual Pokémon aparece, em que tier e com quais golpes."""
+    raids = []
+    for caminho, dados in juntar_por_caminho(camadas, "data/cobblemonraiddens/raid/").items():
+        pokemon = dados.get("pokemon") or {}
+        especie = pokemon.get("species")
+        if not especie:
+            continue
+
+        raids.append(
+            {
+                "pokemon": especie,
+                "dex": dex_por_especie.get(especie),
+                "tier": TIERS.get(dados.get("raid_tier"), 0),
+                "tipo": (dados.get("raid_type") or "").lower(),
+                "golpes": [nome_de_golpe(g, textos) for g in pokemon.get("moves") or []],
+                "peso": dados.get("weight"),
+            }
+        )
+
+    raids.sort(key=lambda r: (-r["tier"], r["pokemon"]))
+    return raids
+
+
+# --- treinadores ----------------------------------------------------------
+
+
+def montar_treinadores(camadas, textos, dex_por_especie):
+    """O time completo de cada treinador: espécie, nível, golpes e habilidade."""
+    treinadores = []
+    for caminho, dados in juntar_por_caminho(camadas, "data/rctmod/trainers/").items():
+        if "/groups/" in caminho:
+            continue
+        time = dados.get("team") or []
+        if not time:
+            continue
+
+        nome = dados.get("name")
+        if isinstance(nome, dict):
+            nome = nome.get("literal") or nome.get("translate") or ""
+
+        membros = []
+        for m in time:
+            if not m.get("species"):
+                continue
+            membros.append(
+                {
+                    "especie": m["species"],
+                    "dex": dex_por_especie.get(m["species"]),
+                    "nivel": m.get("level"),
+                    "habilidade": nome_traduzido(
+                        f"cobblemon.ability.{m.get('ability')}", str(m.get("ability") or ""), textos
+                    )
+                    if m.get("ability")
+                    else None,
+                    "natureza": m.get("nature"),
+                    "golpes": [nome_de_golpe(g, textos) for g in m.get("moveset") or []],
+                }
+            )
+
+        niveis = [m["nivel"] for m in membros if m["nivel"]]
+        treinadores.append(
+            {
+                "id": caminho.split("/")[-1][: -len(".json")],
+                "nome": nome or caminho.split("/")[-1][: -len(".json")].replace("_", " ").title(),
+                "nivelMax": max(niveis) if niveis else 0,
+                "time": membros,
+            }
+        )
+
+    treinadores.sort(key=lambda t: (t["nivelMax"], t["nome"]))
+    return treinadores
+
+
+# --- TMs ------------------------------------------------------------------
+
+
+def montar_tms(camadas, textos):
+    """
+    Cada TM ensina um golpe. O id do item já diz qual: tmcraft:tm_flamethrower.
+    Um mesmo TM tem várias receitas (uma por mod de origem); a gente fica com a
+    primeira que dá pra desenhar.
+    """
+    por_golpe = {}
+
+    for caminho, dados in juntar_contendo(camadas, "/recipe/").items():
+        resultado = dados.get("result")
+        item_id = resultado.get("id") if isinstance(resultado, dict) else resultado
+        if not item_id or not item_id.startswith("tmcraft:tm_"):
+            continue
+
+        golpe = item_id[len("tmcraft:tm_") :]
+        if golpe in por_golpe and por_golpe[golpe]["receita"]:
+            continue
+
+        por_golpe[golpe] = {
+            "id": golpe,
+            "nome": nome_de_golpe(golpe, textos),
+            "receita": montar_receita(dados, textos, camadas),
+        }
+
+    tms = sorted(por_golpe.values(), key=lambda t: t["nome"])
+    return tms
+
+
+# --- índice universal de receitas ----------------------------------------
+
+
+def montar_crafts(camadas, textos):
+    """
+    Toda receita do modpack, pra uma busca só: digita o item, vê como faz.
+    Vinte páginas de receita seriam piores que um campo de busca.
+    """
+    vistos = {}
+
+    for caminho, dados in juntar_contendo(camadas, "/recipe/").items():
+        resultado = dados.get("result")
+        item_id = resultado.get("id") if isinstance(resultado, dict) else resultado
+        if not item_id or not isinstance(item_id, str):
+            continue
+        # Os TMs têm página própria, seriam 2000 linhas de ruído aqui.
+        if item_id.startswith("tmcraft:tm_"):
+            continue
+        if item_id in vistos:
+            continue
+
+        receita = montar_receita(dados, textos, camadas)
+        if not receita:
+            continue
+
+        vistos[item_id] = {
+            "id": item_id,
+            "nome": nome_de_item(item_id, textos),
+            "mod": item_id.split(":")[0],
+            "quantidade": resultado.get("count", 1) if isinstance(resultado, dict) else 1,
+            "receita": receita,
+        }
+
+    crafts = sorted(vistos.values(), key=lambda c: c["nome"])
+    return crafts
 
 
 def main():
@@ -1112,20 +1459,48 @@ def main():
 
     pokemon.sort(key=lambda p: p["dex"] or 9999)
 
-    print("Lendo pokébolas e megaevoluções...")
+    print("Lendo pokébolas, megaevoluções e Z-Moves...")
     bolas = montar_pokebolas(camadas, textos)
     megas = montar_megas_do_pack(camadas, textos)
-    print(f"  {len(bolas)} pokébolas | {len(megas['pedras'])} mega pedras")
+    zmoves = montar_zmoves(camadas, textos)
+    formas = montar_formas(camadas, textos)
+    print(f"  {len(bolas)} bolas | {len(megas['pedras'])} pedras | {len(zmoves)} cristais Z | {len(formas)} formas")
 
-    PASTA_DADOS.mkdir(parents=True, exist_ok=True)
-    destino = PASTA_DADOS / "dados.js"
-    destino.write_text(montar_arquivo_js(pokemon, bolas, megas), encoding="utf-8")
+    print("Lendo raids e treinadores...")
+    # As raids e os treinadores só guardam o NOME da espécie. O número da dex
+    # vem daqui, e é ele que monta o endereço da imagem no site.
+    dex_por_especie = {p["id"]: p["dex"] for p in pokemon}
+    raids = montar_raids(camadas, textos, dex_por_especie)
+    treinadores = montar_treinadores(camadas, textos, dex_por_especie)
+    print(f"  {len(raids)} raids | {len(treinadores)} treinadores")
 
-    com_spawn = sum(1 for p in pokemon if p["locais"])
-    tamanho = destino.stat().st_size / 1_000_000
+    print("Lendo itens, TMs e receitas...")
+    itens = montar_itens(camadas, textos)
+    tms = montar_tms(camadas, textos)
+    crafts = montar_crafts(camadas, textos)
+    total_itens = sum(len(c["itens"]) for c in itens)
+    print(f"  {total_itens} itens em {len(itens)} categorias | {len(tms)} TMs | {len(crafts)} receitas")
+
+    # Um arquivo por assunto: cada página carrega só o que precisa.
+    arquivos = {
+        "pokemon.js": {"DADOS_POKEMON": pokemon},
+        "itens.js": {"DADOS_BOLAS": bolas, "DADOS_ITENS": itens},
+        "megas.js": {"DADOS_MEGAS": megas, "DADOS_ZMOVES": zmoves, "DADOS_FORMAS": formas},
+        "batalha.js": {"DADOS_RAIDS": raids, "DADOS_TREINADORES": treinadores},
+        "tms.js": {"DADOS_TMS": tms},
+        "crafts.js": {"DADOS_CRAFTS": crafts},
+    }
 
     print()
-    print(f"OK: {len(pokemon)} pokémon escritos em dados/dados.js ({tamanho:.1f} MB)")
+    total = 0
+    for nome, blocos in arquivos.items():
+        tamanho = escrever_js(nome, blocos)
+        total += tamanho
+        print(f"  dados/{nome:14} {tamanho/1_000_000:5.1f} MB")
+
+    com_spawn = sum(1 for p in pokemon if p["locais"])
+    print()
+    print(f"OK: {len(pokemon)} pokémon | {total/1_000_000:.1f} MB de dados no total")
     print(f"    {com_spawn} aparecem na natureza | {nao_implementados} ainda não existem no mod")
     if faltando:
         print(f"    tags sem nome em português ({len(faltando)}): {sorted(faltando)}")

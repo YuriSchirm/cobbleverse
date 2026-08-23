@@ -31,14 +31,6 @@ function limpar(id) {
   return String(id).replace("#", "").split(":").pop().replace(/_/g, " ");
 }
 
-function imagemDo(dex) {
-  return (
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" +
-    dex +
-    ".png"
-  );
-}
-
 /* ---------------------------------------------------------------- pedaços */
 
 function blocoStats(stats) {

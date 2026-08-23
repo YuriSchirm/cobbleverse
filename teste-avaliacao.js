@@ -23,7 +23,7 @@ const path = __dirname + "/";
 */
 let TODOS;
 eval(
-  fs.readFileSync(path + "dados/dados.js", "utf8") +
+  fs.readFileSync(path + "dados/pokemon.js", "utf8") +
     "\n" +
     fs.readFileSync(path + "js/tipos.js", "utf8") +
     "\n" +

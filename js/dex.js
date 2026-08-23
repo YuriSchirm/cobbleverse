@@ -12,20 +12,6 @@ const filtroTipo = document.getElementById("filtro-tipo");
 const filtroRaridade = document.getElementById("filtro-raridade");
 const filtroGeracao = document.getElementById("filtro-geracao");
 
-/* Imagem do Pokémon, pelo número da Pokédex. Vem da PokeAPI (precisa de internet). */
-function imagemDo(pokemon) {
-  return (
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" +
-    pokemon.dex +
-    ".png"
-  );
-}
-
-function numeroFormatado(dex) {
-  // 6 vira "#006"
-  return "#" + String(dex).padStart(3, "0");
-}
-
 /* Monta o HTML de um card. */
 function cardDe(pokemon) {
   const tipos = pokemon.tipos
@@ -39,8 +25,8 @@ function cardDe(pokemon) {
 
   return `
     <a class="card r-${raridade}" href="pokemon.html?id=${pokemon.id}">
-      <span class="numero">${numeroFormatado(pokemon.dex)}</span>
-      <img src="${imagemDo(pokemon)}" alt="${pokemon.nome}" loading="lazy"
+      <span class="numero">${numeroDex(pokemon.dex)}</span>
+      <img src="${imagemDo(pokemon.dex)}" alt="${pokemon.nome}" loading="lazy"
            onerror="this.style.visibility='hidden'">
       <h2>${pokemon.nome}</h2>
       <div class="tipos">${tipos}</div>

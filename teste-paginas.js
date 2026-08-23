@@ -15,12 +15,26 @@ const pasta = __dirname + "/";
 
 // As páginas de verdade, na mesma ordem de <script> do HTML.
 const PAGINAS = {
-  "index.html": ["dados/dados.js", "js/tipos.js", "js/dex.js"],
-  "pokemon.html": ["dados/dados.js", "js/tipos.js", "js/ficha.js"],
+  "index.html": ["dados/pokemon.js", "js/tipos.js", "js/dex.js"],
+  "pokemon.html": ["dados/pokemon.js", "js/tipos.js", "js/ficha.js"],
+  "builds.html": ["dados/pokemon.js", "js/tipos.js", "js/avaliar.js", "js/builds.js"],
   "tipos.html": ["js/tipos.js", "js/pagina-tipos.js"],
-  "pokebolas.html": ["dados/dados.js", "js/pagina-bolas.js"],
-  "megas.html": ["dados/dados.js", "js/pagina-megas.js"],
-  "builds.html": ["dados/dados.js", "js/tipos.js", "js/avaliar.js", "js/builds.js"],
+  "raids.html": ["dados/batalha.js", "js/tipos.js", "js/pagina-raids.js"],
+  "treinadores.html": ["dados/batalha.js", "js/pagina-treinadores.js"],
+  "megas.html": ["dados/megas.js", "js/pagina-megas.js"],
+  "zmoves.html": ["dados/megas.js", "js/tipos.js", "js/pagina-zmoves.js"],
+  "formas.html": ["dados/megas.js", "js/pagina-formas.js"],
+  "tms.html": ["dados/tms.js", "js/pagina-tms.js"],
+  "pokebolas.html": ["dados/itens.js", "js/pagina-bolas.js"],
+  "crafts.html": ["dados/crafts.js", "js/pagina-crafts.js"],
+  "berries.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "apricorns.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "evolucao.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "segurados.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "pesca.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "vitaminas.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "mints.html": ["dados/itens.js", "js/pagina-itens.js"],
+  "gems.html": ["dados/itens.js", "js/pagina-itens.js"],
 };
 
 /* Um elemento falso que aceita tudo que os scripts fazem com ele. */
@@ -68,7 +82,7 @@ function rodarPagina(pagina, scripts) {
     isNaN,
     parseInt,
     parseFloat,
-    location: { search: "?id=charizard" },
+    location: { search: "?id=charizard", pathname: "/" + pagina },
     localStorage: {
       dados: {},
       getItem(chave) {
@@ -99,7 +113,7 @@ function rodarPagina(pagina, scripts) {
   contexto.globalThis = contexto;
   vm.createContext(contexto);
 
-  for (const arquivo of scripts) {
+  for (const arquivo of ["js/menu.js", "js/comum.js", ...scripts]) {
     const codigo = fs.readFileSync(pasta + arquivo, "utf8");
     new vm.Script(codigo, { filename: arquivo }).runInContext(contexto);
   }

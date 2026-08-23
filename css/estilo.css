@@ -61,16 +61,30 @@ a { color: inherit; text-decoration: none; }
 
 .topo {
   display: flex;
-  gap: 28px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 14px 24px;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 24px;
   background: var(--pedra);
   border-bottom: 1px solid var(--borda);
   position: sticky;
   top: 0;
   z-index: 5;
 }
+
+.topo-linha { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+
+.abas { display: flex; gap: 4px; flex-wrap: wrap; }
+.aba {
+  padding: 4px 12px;
+  border-radius: var(--canto);
+  color: var(--texto-fraco);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.aba:hover { color: var(--texto); }
+.aba.ativo { background: var(--pedra-alta); color: var(--tocha); }
 
 .marca {
   font-family: var(--fonte-titulo);
@@ -620,4 +634,120 @@ th.lateral {
 @media (max-width: 620px) {
   .nota { grid-template-columns: 80px 32px 1fr; }
   .nota-geral { font-size: 42px; }
+}
+
+
+/* ------------------------------------------------- páginas do patch grande */
+
+/* ---- grade simples de item (berries, apricorns, pesca...) ---- */
+
+.grade-itens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.item-simples {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 9px 11px;
+  font-size: 13px;
+}
+.item-simples img { width: 26px; height: 26px; image-rendering: pixelated; flex-shrink: 0; }
+
+/* ---- raids ---- */
+
+.lista-raids {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+.raid {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 10px 10px 10px 16px;
+}
+/* A faixa lateral marca o tier, do mais fraco ao mais forte. */
+.raid::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: var(--veia, var(--rar-nenhuma));
+}
+.raid.tier-1 { --veia: #8a939e; }
+.raid.tier-2 { --veia: #6fbf73; }
+.raid.tier-3 { --veia: #4a8fd4; }
+.raid.tier-4 { --veia: #9b7fe0; }
+.raid.tier-5 { --veia: #f2a65a; }
+.raid.tier-6 { --veia: #e5674b; }
+.raid.tier-7 { --veia: #4adec4; }
+
+.raid img { width: 56px; height: 56px; image-rendering: pixelated; flex-shrink: 0; }
+.raid-corpo { min-width: 0; }
+.raid h3 { margin: 0 0 5px; font-size: 15px; }
+.tier {
+  font-family: var(--fonte-dados);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--pedra-alta);
+  border: 1px solid var(--borda);
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+
+/* ---- treinadores ---- */
+
+.treinador {
+  background: var(--pedra);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.treinador summary {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 0;
+  color: var(--texto);
+}
+.treinador summary:hover { color: var(--tocha); }
+.treinador-nome { font-family: var(--fonte-titulo); font-weight: 800; font-size: 15px; }
+
+.time {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.membro {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--canto);
+  padding: 8px 10px;
+}
+.membro img { width: 44px; height: 44px; image-rendering: pixelated; flex-shrink: 0; }
+.membro div { display: grid; gap: 1px; min-width: 0; }
+.membro strong { font-size: 13px; }
+.membro .detalhes { margin: 0; font-size: 11px; }
+.membro .numero { font-size: 11px; }
+
+@media (max-width: 620px) {
+  .topo { padding: 10px 16px; }
+  .lista-raids, .grade-itens { grid-template-columns: 1fr; }
 }

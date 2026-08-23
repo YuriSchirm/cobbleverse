@@ -14,8 +14,8 @@ from pathlib import Path
 AQUI = Path(__file__).parent
 DESTINO = AQUI / "cobbleverse.zip"
 
-# O que vai junto. Pastas entram inteiras.
-ARQUIVOS = ["index.html", "pokemon.html", "builds.html", "tipos.html", "pokebolas.html", "megas.html"]
+# Todas as páginas, sem lista escrita à mão: página nova entra sozinha.
+ARQUIVOS = sorted(p.name for p in Path(__file__).parent.glob("*.html"))
 PASTAS = ["css", "js", "dados", "img"]
 
 COMO_USAR = """COBBLEVERSE - Pokedex do modpack

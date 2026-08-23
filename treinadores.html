@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinadores — COBBLEVERSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <header class="topo" id="topo"></header>
+
+  <main>
+    <h1>Treinadores</h1>
+    <p class="contagem">O time completo de cada treinador. Saiba o que vem antes de entrar na luta.</p>
+    <section class="filtros">
+      <input type="search" id="busca" placeholder="Buscar treinador ou Pokémon do time..." autocomplete="off">
+      <div class="selects">
+        <select id="filtro-nivel">
+          <option value="">Qualquer nível</option>
+          <option value="20">até nível 20</option>
+          <option value="40">até nível 40</option>
+          <option value="60">até nível 60</option>
+          <option value="80">até nível 80</option>
+          <option value="100">até nível 100</option>
+        </select>
+      </div>
+      <p class="contagem" id="contagem"></p>
+    </section>
+
+    <div id="lista"></div>
+  </main>
+
+  <script src="js/menu.js"></script>
+  <script src="js/comum.js"></script>
+  <script src="dados/batalha.js"></script>
+  <script src="js/pagina-treinadores.js"></script>
+</body>
+</html>
