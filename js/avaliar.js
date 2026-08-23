@@ -12,12 +12,12 @@
 
 /* Um membro pode estar megaevoluído; aí valem o tipo e o status da mega. */
 function tiposDoMembro(membro) {
-  const mega = membro.pokemon.megas[membro.mega];
+  const mega = membro.pokemon.variantes[membro.mega];
   return mega ? mega.tipos : membro.pokemon.tipos;
 }
 
 function statsDoMembro(membro) {
-  const mega = membro.pokemon.megas[membro.mega];
+  const mega = membro.pokemon.variantes[membro.mega];
   return mega ? mega.stats : membro.pokemon.stats;
 }
 

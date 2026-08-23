@@ -16,6 +16,16 @@ let TODOS = [];
 let time = []; // cada item: { pokemon, mega: null ou o número da forma }
 let slotEmEdicao = null;
 
+/* Avisa no seletor se o Pokémon tem mega, outra forma, ou as duas coisas. */
+function etiquetaDeForma(p) {
+  const temMega = p.variantes.some((v) => v.categoria === "mega");
+  const temForma = p.variantes.some((v) => v.categoria === "forma");
+  if (temMega && temForma) return `<span class="tem-mega">mega + formas</span>`;
+  if (temMega) return `<span class="tem-mega">tem mega</span>`;
+  if (temForma) return `<span class="tem-mega">tem forma</span>`;
+  return "";
+}
+
 function etiquetasDeTipo(tipos) {
   return tipos
     .map(
@@ -67,24 +77,35 @@ function slotCheio(membro, indice) {
   const total = totalDeStats(statsDoMembro(membro));
 
   let seletorMega = "";
-  if (p.megas.length > 0) {
-    const opcoes = p.megas
-      .map(
-        (m, i) =>
-          `<option value="${i}" ${membro.mega === i ? "selected" : ""}>${m.nome}</option>`
-      )
-      .join("");
+  if (p.variantes.length > 0) {
+    /*
+      Mega e forma comum ficam em grupos separados de propósito. Mega é
+      temporária e precisa de pedra; forma regional (Alolan, Hisui) ou os
+      cavaleiros do Calyrex são permanentes. Juntar as duas na mesma lista
+      daria a entender que é tudo a mesma coisa.
+    */
+    function grupo(titulo, categoria) {
+      const opcoes = p.variantes
+        .map((v, i) =>
+          v.categoria === categoria
+            ? `<option value="${i}" ${membro.mega === i ? "selected" : ""}>${v.nome}</option>`
+            : ""
+        )
+        .join("");
+      return opcoes ? `<optgroup label="${titulo}">${opcoes}</optgroup>` : "";
+    }
 
     seletorMega = `
       <label class="mega">
-        <span>Mega evolução</span>
+        <span>Forma</span>
         <select data-mega="${indice}">
-          <option value="">Não usar</option>
-          ${opcoes}
+          <option value="">Normal</option>
+          ${grupo("Mega evolução", "mega")}
+          ${grupo("Outras formas", "forma")}
         </select>
       </label>`;
   } else {
-    seletorMega = `<p class="sem-mega">Não tem mega evolução</p>`;
+    seletorMega = `<p class="sem-mega">Só tem a forma normal</p>`;
   }
 
   return `
@@ -241,7 +262,7 @@ function mostrarResultados() {
         <img src="${imagemDo(p.dex)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <span class="nome">${p.nome}</span>
         <span class="tipos">${etiquetasDeTipo(p.tipos)}</span>
-        ${p.megas.length ? `<span class="tem-mega">tem mega</span>` : ""}
+        ${etiquetaDeForma(p)}
       </button>`
     )
     .join("");

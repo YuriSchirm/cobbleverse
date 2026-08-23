@@ -523,21 +523,48 @@ def carregar_formas_extras(camadas):
     return extras
 
 
-def montar_megas(especie, formas_extras):
-    """
-    As formas Mega de um Pokémon.
+# Sufixos que o Cobblemon usa nos aspectos e que não acrescentam nada ao nome.
+# "heat-appliance" é só o Rotom Heat; "attack-forme" é o Deoxys Attack.
+SUFIXOS_INUTEIS = ("forme", "appliance")
 
-    Elas ficam em "forms" junto com outras formas (Gmax, regionais). A Mega é a
-    única que interessa aqui, e ela traz tipo e status próprios — Mega Charizard
-    X, por exemplo, deixa de ser Voador e vira Dragão.
+
+def nome_da_forma(forma):
+    """
+    O nome que vai aparecer na tela.
+
+    O campo "name" às vezes é curto demais: a forma do Calyrex se chama só
+    "Ice", mas o aspecto dela é "ice-rider" — e Ice Rider é o nome de verdade.
+    Então o aspecto manda, tirando os sufixos que só enchem linguiça.
+    """
+    aspectos = forma.get("aspects") or []
+    if aspectos:
+        partes = [p for p in str(aspectos[0]).split("-") if p not in SUFIXOS_INUTEIS]
+        if partes:
+            return " ".join(p.capitalize() for p in partes)
+    return forma.get("name") or "Forma"
+
+
+def montar_variantes(especie, formas_extras):
+    """
+    Todas as formas de um Pokémon que mudam tipo ou status.
+
+    Vem tudo de "forms": megas, formas regionais (Alola, Galar, Hisui), Rotom,
+    Deoxys, os cavaleiros do Calyrex... Antes eu só pegava as megas, e por isso
+    103 formas não apareciam no site.
+
+    As megas vêm primeiro de propósito: os times já salvos guardam a posição
+    da forma escolhida, e mudar essa ordem estragaria os times de quem já usou.
     """
     megas = []
+    outras = []
+
     for forma in list(especie.get("forms") or []) + formas_extras:
-        nome = forma.get("name") or ""
-        if not (nome.startswith("Mega") or nome.startswith("Primal")):
-            continue
         if not forma.get("baseStats"):
-            continue  # forma sem status é só aparência, não serve pra avaliar
+            continue  # forma sem status é só aparência, não muda batalha
+
+        nome_bruto = forma.get("name") or ""
+        e_mega = nome_bruto.startswith("Mega") or nome_bruto.startswith("Primal")
+        nome = nome_bruto if e_mega else nome_da_forma(forma)
 
         # Quando a forma não declara tipo, é porque ela mantém o do Pokémon
         # normal — o mod só escreve o que MUDA. Mega Dragonite é assim.
@@ -547,9 +574,15 @@ def montar_megas(especie, formas_extras):
                 t for t in (especie.get("primaryType"), especie.get("secondaryType")) if t
             ]
 
-        megas.append({"nome": nome, "tipos": tipos, "stats": forma.get("baseStats")})
+        variante = {
+            "nome": nome,
+            "tipos": tipos,
+            "stats": forma.get("baseStats"),
+            "categoria": "mega" if e_mega else "forma",
+        }
+        (megas if e_mega else outras).append(variante)
 
-    return megas
+    return megas + outras
 
 
 def montar_evolucoes(especie, textos):
@@ -1182,6 +1215,30 @@ def montar_zmoves(camadas, textos):
 # --- formas de batalha (Gigantamax, Primal, Arceus...) --------------------
 
 
+def montar_variantes_planas(pokemon):
+    """
+    Uma lista simples das formas de todos os Pokémon, pra página de Formas.
+    A página não carrega a Pokédex inteira só pra saber que Calyrex tem duas.
+    """
+    linhas = []
+    for p in pokemon:
+        for v in p["variantes"]:
+            linhas.append(
+                {
+                    "pokemon": p["nome"],
+                    "id": p["id"],
+                    "dex": p["dex"],
+                    "forma": v["nome"],
+                    "categoria": v["categoria"],
+                    "tipos": v["tipos"],
+                    "total": sum(v["stats"].values()),
+                    "totalBase": sum(p["stats"].values()),
+                }
+            )
+    linhas.sort(key=lambda l: (l["pokemon"], l["forma"]))
+    return linhas
+
+
 def montar_formas(camadas, textos):
     arquivos = {
         c: d
@@ -1447,7 +1504,7 @@ def main():
                 "peso": especie.get("weight"),
                 "preEvolucao": (especie.get("preEvolution") or "").split(" ")[0] or None,
                 "evolucoes": montar_evolucoes(especie, textos),
-                "megas": montar_megas(especie, formas_extras.get(chave, [])),
+                "variantes": montar_variantes(especie, formas_extras.get(chave, [])),
                 "descricao": textos.get(
                     (especie.get("pokedex") or [""])[0], ""
                 ),
@@ -1464,7 +1521,8 @@ def main():
     megas = montar_megas_do_pack(camadas, textos)
     zmoves = montar_zmoves(camadas, textos)
     formas = montar_formas(camadas, textos)
-    print(f"  {len(bolas)} bolas | {len(megas['pedras'])} pedras | {len(zmoves)} cristais Z | {len(formas)} formas")
+    variantes = montar_variantes_planas(pokemon)
+    print(f"  {len(bolas)} bolas | {len(megas['pedras'])} pedras | {len(zmoves)} cristais Z | {len(formas)} formas de batalha | {len(variantes)} formas de Pokémon")
 
     print("Lendo raids e treinadores...")
     # As raids e os treinadores só guardam o NOME da espécie. O número da dex
@@ -1485,7 +1543,7 @@ def main():
     arquivos = {
         "pokemon.js": {"DADOS_POKEMON": pokemon},
         "itens.js": {"DADOS_BOLAS": bolas, "DADOS_ITENS": itens},
-        "megas.js": {"DADOS_MEGAS": megas, "DADOS_ZMOVES": zmoves, "DADOS_FORMAS": formas},
+        "megas.js": {"DADOS_MEGAS": megas, "DADOS_ZMOVES": zmoves, "DADOS_FORMAS": formas, "DADOS_VARIANTES": variantes},
         "batalha.js": {"DADOS_RAIDS": raids, "DADOS_TREINADORES": treinadores},
         "tms.js": {"DADOS_TMS": tms},
         "crafts.js": {"DADOS_CRAFTS": crafts},

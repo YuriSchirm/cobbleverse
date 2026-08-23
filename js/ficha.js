@@ -97,6 +97,45 @@ function blocoEfetividade(tipos) {
     </section>`;
 }
 
+/* As formas com status próprio: mega, regionais, Rotom, os cavaleiros do Calyrex. */
+function blocoFormas(pokemon) {
+  if (pokemon.variantes.length === 0) return "";
+
+  const base = Object.values(pokemon.stats).reduce((a, b) => a + b, 0);
+
+  const linhas = pokemon.variantes
+    .map(function (v) {
+      const total = Object.values(v.stats).reduce((a, b) => a + b, 0);
+      const diferenca = total - base;
+      const sinal = diferenca > 0 ? `+${diferenca}` : diferenca;
+
+      const tipos = v.tipos
+        .map(
+          (t) => `<span class="tipo" style="background:${CORES_TIPO[t]}">${NOMES_TIPO[t]}</span>`
+        )
+        .join("");
+
+      return `
+        <article class="local">
+          <div class="local-topo">
+            <strong>${v.nome}</strong>
+            <span>${v.categoria === "mega" ? "mega evolução" : "forma"}</span>
+            <span>status ${total} (${sinal})</span>
+          </div>
+          <div class="linha-tipos">${tipos}</div>
+        </article>`;
+    })
+    .join("");
+
+  return `
+    <section class="painel">
+      <h2>Outras formas</h2>
+      <p class="detalhes">Cada uma muda tipo ou status. Dá pra testar no
+        <a href="builds.html">montador de time</a>.</p>
+      ${linhas}
+    </section>`;
+}
+
 function blocoEvolucao(pokemon, porId) {
   if (!pokemon.preEvolucao && pokemon.evolucoes.length === 0) return "";
 
@@ -218,6 +257,7 @@ function desenhar(pokemon, porId) {
       ${blocoOndeEncontrar(pokemon)}
       ${blocoEfetividade(pokemon.tipos)}
       ${blocoStats(pokemon.stats)}
+      ${blocoFormas(pokemon)}
       ${blocoEvolucao(pokemon, porId)}
 
       <section class="painel">

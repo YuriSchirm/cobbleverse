@@ -19,6 +19,26 @@ function cardDeForma(forma) {
     </article>`;
 }
 
+function cardDeVariante(v) {
+  const tipos = v.tipos
+    .map((t) => `<span class="tipo" style="background:${CORES_TIPO[t]}">${NOMES_TIPO[t]}</span>`)
+    .join("");
+  const diferenca = v.total - v.totalBase;
+  const sinal = diferenca > 0 ? `+${diferenca}` : diferenca;
+
+  return `
+    <article class="item-mega">
+      <header>
+        <img src="${v.dex ? imagemDo(v.dex) : ""}" alt="" loading="lazy"
+             onerror="this.style.display='none'">
+        <h3><a href="pokemon.html?id=${v.id}">${v.pokemon}</a></h3>
+      </header>
+      <p class="para-quem">${v.forma}</p>
+      <div class="tipos">${tipos}</div>
+      <p class="detalhes">Status ${v.total} <span class="numero">(${sinal} do normal)</span></p>
+    </article>`;
+}
+
 function atualizar() {
   const texto = busca.value.trim().toLowerCase();
 
@@ -30,10 +50,32 @@ function atualizar() {
     );
   });
 
-  contagem.textContent = `${visiveis.length} de ${DADOS_FORMAS.length} formas`;
-  lista.innerHTML = visiveis.length
-    ? `<div class="lista-itens">${visiveis.map(cardDeForma).join("")}</div>`
-    : `<p class="nada">Nada com esse nome.</p>`;
+  const variantes = DADOS_VARIANTES.filter(function (v) {
+    if (!texto) return true;
+    return (
+      v.pokemon.toLowerCase().includes(texto) || v.forma.toLowerCase().includes(texto)
+    );
+  });
+
+  const total = DADOS_FORMAS.length + DADOS_VARIANTES.length;
+  contagem.textContent = `${visiveis.length + variantes.length} de ${total} formas`;
+
+  lista.innerHTML =
+    (variantes.length
+      ? `<section class="painel">
+           <h2>Formas com status próprio <span class="numero">${variantes.length}</span></h2>
+           <p class="detalhes">Mudam tipo ou status: regionais, Rotom, Deoxys, os cavaleiros do Calyrex.</p>
+           <div class="lista-itens">${variantes.map(cardDeVariante).join("")}</div>
+         </section>`
+      : "") +
+    (visiveis.length
+      ? `<section class="painel">
+           <h2>Trocas dentro da batalha <span class="numero">${visiveis.length}</span></h2>
+           <p class="detalhes">Precisam de um item e acontecem no meio da luta.</p>
+           <div class="lista-itens">${visiveis.map(cardDeForma).join("")}</div>
+         </section>`
+      : "") ||
+    `<p class="nada">Nada com esse nome.</p>`;
 }
 
 busca.addEventListener("input", atualizar);

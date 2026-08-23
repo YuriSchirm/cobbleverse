@@ -23,7 +23,7 @@ const PAGINAS = {
   "treinadores.html": ["dados/batalha.js", "js/pagina-treinadores.js"],
   "megas.html": ["dados/megas.js", "js/pagina-megas.js"],
   "zmoves.html": ["dados/megas.js", "js/tipos.js", "js/pagina-zmoves.js"],
-  "formas.html": ["dados/megas.js", "js/pagina-formas.js"],
+  "formas.html": ["dados/megas.js", "js/tipos.js", "js/pagina-formas.js"],
   "tms.html": ["dados/tms.js", "js/pagina-tms.js"],
   "pokebolas.html": ["dados/itens.js", "js/pagina-bolas.js"],
   "crafts.html": ["dados/crafts.js", "js/pagina-crafts.js"],

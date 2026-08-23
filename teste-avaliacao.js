@@ -68,6 +68,41 @@ conferir(
   calcularDefesa(tiposDoMembro(zardBase)).electric + "x -> " + calcularDefesa(tiposDoMembro(zardX)).electric + "x"
 );
 
+console.log("\n=== 1b. Formas que nao sao mega ===");
+const calyrex = TODOS.find((p) => p.id === "calyrex");
+const nomesCalyrex = calyrex.variantes.map((v) => v.nome);
+conferir(
+  "Calyrex tem Ice Rider e Shadow Rider",
+  nomesCalyrex.includes("Ice Rider") && nomesCalyrex.includes("Shadow Rider"),
+  nomesCalyrex.join(", ")
+);
+const iceRider = { pokemon: calyrex, mega: nomesCalyrex.indexOf("Ice Rider") };
+conferir(
+  "Ice Rider e Psiquico/Gelo",
+  JSON.stringify(tiposDoMembro(iceRider)) === '["psychic","ice"]',
+  tiposDoMembro(iceRider).join("/")
+);
+conferir(
+  "Ice Rider e bem mais forte que o Calyrex normal",
+  totalDeStats(statsDoMembro(iceRider)) > totalDeStats(calyrex.stats),
+  totalDeStats(calyrex.stats) + " -> " + totalDeStats(statsDoMembro(iceRider))
+);
+const raichu = TODOS.find((p) => p.id === "raichu");
+conferir(
+  "Raichu tem mega E forma Alolan, separadas por categoria",
+  raichu.variantes.some((v) => v.categoria === "mega") &&
+    raichu.variantes.some((v) => v.categoria === "forma"),
+  raichu.variantes.map((v) => v.nome + "/" + v.categoria).join(" ")
+);
+conferir(
+  "As megas vem primeiro (times salvos guardam a posicao)",
+  TODOS.filter((p) => p.variantes.length > 1).every(function (p) {
+    const primeiraForma = p.variantes.findIndex((v) => v.categoria === "forma");
+    const ultimaMega = p.variantes.map((v) => v.categoria).lastIndexOf("mega");
+    return primeiraForma === -1 || ultimaMega === -1 || ultimaMega < primeiraForma;
+  })
+);
+
 console.log("\n=== 2. Fraqueza compartilhada derruba a nota de Defesa ===");
 const soFogo = monta(["charizard", "arcanine", "rapidash", "magmar", "flareon", "typhlosion"]);
 const misto = monta(["charizard", "gyarados", "venusaur", "alakazam", "steelix", "gengar"]);
