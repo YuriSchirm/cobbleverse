@@ -1,5 +1,7 @@
 # Pokédex do COBBLEVERSE
 
+**No ar em: https://yurischirm.github.io/cobbleverse/**
+
 Site pra consultar os Pokémon do modpack. Os dados são lidos direto dos
 arquivos do modpack instalado, então batem com o que aparece no seu jogo.
 
@@ -13,7 +15,20 @@ ler outros arquivos do disco. Agora os dados são um `<script>` (`dados/dados.js
 que não tem essa restrição. Por isso abre direto, e por isso dá pra mandar
 zipado pra alguém.
 
-## Mandar pra alguém
+## Atualizar o site no ar
+
+Mexeu em alguma coisa? Três comandos:
+
+```
+git add -A
+git commit -m "o que mudou"
+git push
+```
+
+Em ~1 minuto o site publicado já está com a mudança. Não precisa mandar
+arquivo pra ninguém.
+
+## Mandar pra alguém (sem internet)
 
 ```
 python criar-zip.py
@@ -90,4 +105,3 @@ Projeto de fã, sem ligação oficial com ninguém.
 ## Ideias pra depois
 
 - Treinadores e ginásios (o `COBBLEVERSE-RCT-DP-v20.zip` tem 456 treinadores)
-- Publicar no GitHub Pages, pra ter um link em vez de mandar arquivo
