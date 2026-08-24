@@ -801,16 +801,14 @@ th.lateral {
 
 /* ------------------------------------------------------------ time ideal */
 
-.escolha {
-  display: flex;
-  gap: 18px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  margin: 16px 0 22px;
+.escolha { margin: 16px 0 14px; }
+.escolha label {
+  display: grid;
+  gap: 5px;
+  max-width: 380px;
+  font-size: 13px;
+  color: var(--texto-fraco);
 }
-.slot-favorito { flex: 0 0 210px; }
-.escolha label { display: grid; gap: 5px; font-size: 13px; color: var(--texto-fraco); }
-.escolha select { min-width: 280px; }
 
 /* O favorito não é sugestão do site: é a escolha do usuário. A borda amarela
    é o que separa "o que você mandou" de "o que eu escolhi". */
@@ -824,6 +822,5 @@ th.lateral {
 }
 
 @media (max-width: 620px) {
-  .slot-favorito { flex: 1 1 100%; }
-  .escolha select { min-width: 0; width: 100%; }
+  .escolha label { max-width: none; }
 }

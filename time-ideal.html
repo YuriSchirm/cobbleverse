@@ -15,13 +15,11 @@
 
   <main>
     <h1>Time ideal</h1>
-    <p class="contagem">Escolha o Pokémon que você quer usar e o site monta os outros 5 em volta dele.</p>
+    <p class="contagem">Escolha de 1 a 5 Pokémon que você quer usar e o site completa o time de 6.</p>
 
     <section class="escolha">
-      <div class="slot-favorito" id="favorito"></div>
-
       <label>
-        <span>Quem pode entrar no time</span>
+        <span>Quem pode entrar nas vagas que sobrarem</span>
         <select id="dificuldade">
           <option value="natureza">Só quem nasce na natureza</option>
           <option value="faceis">Só comuns e incomuns (time fácil de montar)</option>
@@ -29,6 +27,9 @@
         </select>
       </label>
     </section>
+
+    <p class="contagem" id="quantos"></p>
+    <section class="slots" id="favoritos"></section>
 
     <section id="resultado"></section>
   </main>

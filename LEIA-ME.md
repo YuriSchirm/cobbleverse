@@ -14,7 +14,7 @@ modpack instalado, então batem com o que aparece no seu jogo.
 | Pokédex | 1025 Pokémon: busca, filtro por tipo, raridade e geração |
 | Ficha | onde encontrar, fraquezas, status, evolução, habilidades |
 | Builds | monta o time de 6, dá nota e diz o que trocar |
-| Time ideal | você escolhe um Pokémon e o site monta os outros 5 em volta dele |
+| Time ideal | você escolhe de 1 a 5 Pokémon e o site completa o time de 6 |
 | Tipos | calculadora de fraquezas + tabela dos 18 tipos |
 
 **Batalha**

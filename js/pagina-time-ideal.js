@@ -1,18 +1,20 @@
 /*
-  Time ideal: você escolhe um Pokémon e o site monta os outros 5 em volta dele.
+  Time ideal: você escolhe de 1 a 5 Pokémon e o site completa o time de 6.
 
   A diferença pra página de Builds é de quem faz o trabalho. Lá você monta e o
-  site critica; aqui você dá o ponto de partida e o site monta. As contas são
+  site critica; aqui você dá o ponto de partida e o site completa. As contas são
   as mesmas — vêm todas de js/avaliar.js.
 */
 
-const CAIXA_FAVORITO = "cobbleverse-favorito";
+const CAIXA_FAVORITOS = "cobbleverse-favoritos";
+const MAXIMO_ESCOLHIDOS = 5; // um a menos que o time, senão não sobra vaga pra montar
 
-const areaFavorito = document.getElementById("favorito");
+const areaFavoritos = document.getElementById("favoritos");
+const areaQuantos = document.getElementById("quantos");
 const areaResultado = document.getElementById("resultado");
 const campoDificuldade = document.getElementById("dificuldade");
 
-let favorito = null;
+let escolhidos = [];
 
 /* ------------------------------------------------ quem pode entrar no time */
 
@@ -20,6 +22,9 @@ let favorito = null;
   Sem o filtro de dificuldade a resposta seria sempre a mesma lista de lendários:
   eles têm status altíssimo e o algoritmo iria atrás disso. Um time que você não
   consegue montar não serve pra nada.
+
+  O filtro vale só pras vagas que o site preenche. Quem você escolheu entra do
+  jeito que está — é a sua escolha, não é sugestão minha.
 */
 function passaNaDificuldade(p, nivel) {
   // Sem raridade = não nasce na natureza: vem de evolução, ovo ou evento.
@@ -70,20 +75,26 @@ function porqueEntrou(timeAntes, p) {
   a cada rodada, pega o melhor pedaço na hora e não volta atrás.
 
   Aqui: testa os 1025 Pokémon como se cada um fosse o próximo do time, fica com
-  o que faz a nota geral subir mais, e repete até fechar os 6.
+  o que faz a nota geral subir mais, e repete até fechar os 6. Quanto mais você
+  escolher à mão, menos rodadas ele precisa — com 5 escolhidos, sobra uma vaga
+  e ele roda uma vez só.
 
   Por que não testar todas as combinações possíveis? Porque escolher 5 entre
   1025 dá mais de 1 quatrilhão de times — o navegador não terminaria nunca.
   O guloso não garante o melhor time do universo. Garante um time bom e, o que
   importa mais aqui, EXPLICÁVEL: dá pra dizer por que cada um entrou.
 */
-function montarTime(escolhido, nivel) {
-  const time = [
-    {
-      pokemon: escolhido,
-      porque: "é o seu favorito — o time inteiro foi montado em volta dele",
-    },
-  ];
+function montarTime(escolhaDoJogador, nivel) {
+  const suaEscolha =
+    escolhaDoJogador.length === 1
+      ? "é o seu favorito — o time inteiro foi montado em volta dele"
+      : "é uma das suas escolhas — o time foi montado em volta delas";
+
+  const time = escolhaDoJogador.map((p) => ({
+    pokemon: p,
+    escolhido: true,
+    porque: suaEscolha,
+  }));
 
   while (time.length < 6) {
     let melhor = null;
@@ -106,62 +117,75 @@ function montarTime(escolhido, nivel) {
 
     // A razão é calculada ANTES do push, com o time do jeito que ele estava.
     const razao = porqueEntrou(time, melhor);
-    time.push({ pokemon: melhor, porque: razao });
+    time.push({ pokemon: melhor, escolhido: false, porque: razao });
   }
 
   return time;
 }
 
-/* ----------------------------------------------------------- o favorito */
+/* --------------------------------------------------------- os escolhidos */
 
-function salvarFavorito() {
+function salvarEscolhidos() {
   try {
-    localStorage.setItem(CAIXA_FAVORITO, favorito ? favorito.id : "");
+    localStorage.setItem(CAIXA_FAVORITOS, JSON.stringify(escolhidos.map((p) => p.id)));
   } catch (erro) {
     // Navegador anônimo ou storage bloqueado: não é motivo pra quebrar a página.
   }
 }
 
-function carregarFavorito() {
+function carregarEscolhidos() {
   try {
-    const id = localStorage.getItem(CAIXA_FAVORITO);
-    if (id) favorito = DADOS_POKEMON.find((p) => p.id === id) || null;
+    const ids = JSON.parse(localStorage.getItem(CAIXA_FAVORITOS) || "[]");
+    for (const id of ids) {
+      const p = DADOS_POKEMON.find((x) => x.id === id);
+      if (p) escolhidos.push(p);
+    }
   } catch (erro) {
-    favorito = null;
+    escolhidos = [];
   }
 }
 
-function desenharFavorito() {
-  if (!favorito) {
-    areaFavorito.innerHTML = `
-      <button type="button" class="slot-time vazio" data-trocar>
-        <span class="mais">+</span>
-        <span>Escolher Pokémon</span>
-      </button>`;
-    return;
-  }
-
-  areaFavorito.innerHTML = `
-    <article class="slot-time cheio favorito r-${favorito.raridadeId || "nenhuma"}">
-      <span class="etiqueta-favorito">seu favorito</span>
-      <a href="pokemon.html?id=${favorito.id}">
-        <img src="${imagemDo(favorito.dex)}" alt="${favorito.nome}" onerror="this.style.visibility='hidden'">
+function cartaoDoEscolhido(p, indice) {
+  return `
+    <article class="slot-time cheio favorito r-${p.raridadeId || "nenhuma"}">
+      <button type="button" class="tirar" data-tirar-escolhido="${indice}" title="Tirar da escolha">×</button>
+      <span class="etiqueta-favorito">escolha sua</span>
+      <a href="pokemon.html?id=${p.id}">
+        <img src="${imagemDo(p.dex)}" alt="${p.nome}" onerror="this.style.visibility='hidden'">
       </a>
-      <h3>${favorito.nome}</h3>
-      <div class="tipos">${etiquetasDeTipo(favorito.tipos)}</div>
-      <p class="raridade raridade-${favorito.raridadeId || "nenhuma"}">${favorito.raridade}</p>
-      <button type="button" class="botao-fraco trocar" data-trocar>Trocar</button>
+      <h3>${p.nome}</h3>
+      <div class="tipos">${etiquetasDeTipo(p.tipos)}</div>
+      <p class="raridade raridade-${p.raridadeId || "nenhuma"}">${p.raridade}</p>
     </article>`;
+}
+
+function desenharEscolhidos() {
+  const vagas = MAXIMO_ESCOLHIDOS - escolhidos.length;
+
+  areaQuantos.textContent =
+    escolhidos.length === 0
+      ? `Nenhum escolhido ainda — escolha de 1 a ${MAXIMO_ESCOLHIDOS}`
+      : `${escolhidos.length} de ${MAXIMO_ESCOLHIDOS} escolhidos · o site completa as outras ${6 - escolhidos.length} vagas`;
+
+  const botaoMais =
+    vagas > 0
+      ? `<button type="button" class="slot-time vazio" data-adicionar-escolhido>
+           <span class="mais">+</span>
+           <span>Escolher Pokémon</span>
+         </button>`
+      : "";
+
+  areaFavoritos.innerHTML = escolhidos.map(cartaoDoEscolhido).join("") + botaoMais;
 }
 
 /* ------------------------------------------------------------ o resultado */
 
-function cardDoMembro(membro, indice) {
+function cardDoMembro(membro) {
   const p = membro.pokemon;
 
   return `
-    <article class="slot-time cheio r-${p.raridadeId || "nenhuma"}${indice === 0 ? " favorito" : ""}">
-      ${indice === 0 ? `<span class="etiqueta-favorito">seu favorito</span>` : ""}
+    <article class="slot-time cheio r-${p.raridadeId || "nenhuma"}${membro.escolhido ? " favorito" : ""}">
+      ${membro.escolhido ? `<span class="etiqueta-favorito">escolha sua</span>` : ""}
       <a href="pokemon.html?id=${p.id}">
         <img src="${imagemDo(p.dex)}" alt="${p.nome}" loading="lazy" onerror="this.style.visibility='hidden'">
       </a>
@@ -204,20 +228,20 @@ function desenharResultado(time) {
       ${barraDeNota("Praticidade", notas.praticidade, "dá pra pegar esse time no seu mundo")}
 
       <p class="ressalva">
-        O time é montado por um algoritmo guloso: ele escolhe o melhor
-        companheiro de cada vez, sem voltar atrás. Não é o melhor time possível
-        do jogo — é um time bom e coerente com o seu favorito. Quer mexer nele à
-        mão? A página de <a href="builds.html">Builds</a> serve pra isso.
+        As vagas que você não preencheu vão pra um algoritmo guloso: ele escolhe
+        o melhor companheiro de cada vez, sem voltar atrás. Não é o melhor time
+        possível do jogo — é um time bom e coerente com quem você escolheu. Quer
+        mexer nele à mão? A página de <a href="builds.html">Builds</a> serve pra isso.
       </p>
     </section>`;
 }
 
 function montar() {
-  if (!favorito) {
+  if (escolhidos.length === 0) {
     areaResultado.innerHTML = `
       <section class="painel">
         <h2>Escolha alguém primeiro</h2>
-        <p class="nada">Clique no quadrado acima e escolha o Pokémon que você quer no time.</p>
+        <p class="nada">Clique no quadrado acima e escolha quem você quer no time.</p>
       </section>`;
     return;
   }
@@ -233,27 +257,41 @@ function montar() {
     a vez pro navegador desenhar, e a conta começa logo em seguida.
   */
   setTimeout(function () {
-    desenharResultado(montarTime(favorito, campoDificuldade.value));
+    desenharResultado(montarTime(escolhidos, campoDificuldade.value));
   }, 0);
+}
+
+function atualizar() {
+  desenharEscolhidos();
+  salvarEscolhidos();
+  montar();
 }
 
 /* --------------------------------------------------------------- eventos */
 
 document.addEventListener("click", function (evento) {
-  if (!evento.target.closest("[data-trocar]")) return;
+  const alvo = evento.target.closest("[data-adicionar-escolhido], [data-tirar-escolhido]");
+  if (!alvo) return;
 
-  abrirSeletor([], function (pokemon) {
-    favorito = pokemon;
-    salvarFavorito();
-    desenharFavorito();
-    montar();
-  });
+  if (alvo.dataset.tirarEscolhido !== undefined) {
+    escolhidos.splice(Number(alvo.dataset.tirarEscolhido), 1);
+    atualizar();
+    return;
+  }
+
+  // O seletor esconde quem já está escolhido, pra não entrar duas vezes.
+  abrirSeletor(
+    escolhidos.map((p) => p.id),
+    function (pokemon) {
+      if (escolhidos.length < MAXIMO_ESCOLHIDOS) escolhidos.push(pokemon);
+      atualizar();
+    }
+  );
 });
 
 campoDificuldade.addEventListener("change", montar);
 
 /* ------------------------------------------------------------- o começo */
 
-carregarFavorito();
-desenharFavorito();
-montar();
+carregarEscolhidos();
+atualizar();
