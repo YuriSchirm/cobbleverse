@@ -5,7 +5,7 @@
 Site pra consultar tudo do modpack. Os dados são lidos direto dos arquivos do
 modpack instalado, então batem com o que aparece no seu jogo.
 
-## As 20 páginas
+## As 21 páginas
 
 **Pokémon**
 
@@ -14,6 +14,7 @@ modpack instalado, então batem com o que aparece no seu jogo.
 | Pokédex | 1025 Pokémon: busca, filtro por tipo, raridade e geração |
 | Ficha | onde encontrar, fraquezas, status, evolução, habilidades |
 | Builds | monta o time de 6, dá nota e diz o que trocar |
+| Time ideal | você escolhe um Pokémon e o site monta os outros 5 em volta dele |
 | Tipos | calculadora de fraquezas + tabela dos 18 tipos |
 
 **Batalha**
@@ -76,7 +77,7 @@ ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste
 ```
 
 - `teste-avaliacao.js` — 19 conferências nas contas da nota do time
-- `teste-paginas.js` — carrega as 20 páginas com um DOM falso e vê se quebrou
+- `teste-paginas.js` — carrega as 21 páginas com um DOM falso e vê se quebrou
 
 ## Como o código está organizado
 
@@ -84,10 +85,11 @@ ELECTRON_RUN_AS_NODE=1 "$LOCALAPPDATA/Programs/Microsoft VS Code/Code.exe" teste
 |---|---|
 | `extrair.py` | Lê o modpack e gera a pasta `dados/`. Roda só quando o pack muda. |
 | `criar-zip.py` | Monta o zip pra mandar pra alguém. |
-| `js/menu.js` | O cabeçalho, escrito uma vez só e usado pelas 20 páginas. |
+| `js/menu.js` | O cabeçalho, escrito uma vez só e usado pelas 21 páginas. |
 | `js/comum.js` | O que várias páginas usam: imagem do Pokémon, desenhar receita. |
+| `js/seletor.js` | A janela de escolher Pokémon. Builds e Time ideal usam a mesma. |
 | `js/tipos.js` | Tabela de efetividade dos 18 tipos e as contas. |
-| `js/avaliar.js` | As notas do time. O cérebro da página de builds. |
+| `js/avaliar.js` | As notas do time. O cérebro das páginas de Builds e Time ideal. |
 | `js/pagina-*.js` | Um por página. |
 | `js/pagina-itens.js` | Serve as 8 páginas de categoria: a categoria sai do nome do arquivo. |
 | `css/estilo.css` | Todo o visual. |

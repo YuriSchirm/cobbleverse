@@ -282,9 +282,15 @@ const VEREDITOS = [
   [0, "Precisa de ajustes", "Tem furo grande. Comece pelo primeiro problema da lista."],
 ];
 
-function avaliarTime(time, todos) {
-  if (time.length === 0) return null;
+/*
+  Só as quatro notas e a média delas.
 
+  Está separado do avaliarTime de propósito: a página de Time ideal chama isto
+  aqui umas cinco mil vezes seguidas pra escolher os companheiros, e não pode
+  arrastar junto o acharProblemas — que varre os 1025 Pokémon atrás de
+  sugestões e é, de longe, o pedaço caro deste arquivo.
+*/
+function calcularNotas(time) {
   const analise = analisarTime(time);
 
   const notas = {
@@ -294,6 +300,7 @@ function avaliarTime(time, todos) {
     praticidade: notaPraticidade(time),
   };
 
+  // Defesa pesa mais que todo o resto porque fraqueza repetida é o que mata time.
   notas.geral = Math.round(
     notas.defesa * 0.35 +
       notas.ataque * 0.3 +
@@ -301,12 +308,25 @@ function avaliarTime(time, todos) {
       notas.praticidade * 0.15
   );
 
-  const veredito = VEREDITOS.find((v) => notas.geral >= v[0]);
+  return { notas, analise };
+}
+
+/* A frase que acompanha a nota. A lista está em ordem decrescente, então o
+   primeiro que a nota alcança é o certo. */
+function vereditoDe(notaGeral) {
+  const v = VEREDITOS.find((x) => notaGeral >= x[0]);
+  return { titulo: v[1], texto: v[2] };
+}
+
+function avaliarTime(time, todos) {
+  if (time.length === 0) return null;
+
+  const { notas, analise } = calcularNotas(time);
 
   return {
     notas,
     analise,
-    veredito: { titulo: veredito[1], texto: veredito[2] },
+    veredito: vereditoDe(notas.geral),
     problemas: acharProblemas(time, analise, todos),
     completo: time.length === 6,
   };

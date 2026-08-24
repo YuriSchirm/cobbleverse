@@ -1,38 +1,17 @@
 /*
-  A página de builds: os 6 slots, o seletor de Pokémon e a tela de resultado.
-  As contas da avaliação estão em js/avaliar.js.
+  A página de builds: os 6 slots e a tela de resultado.
+  As contas da avaliação estão em js/avaliar.js; a janela de escolher Pokémon,
+  em js/seletor.js.
 */
 
 const CAIXA = "cobbleverse-time"; // nome da gaveta onde o time fica salvo
 
 const areaSlots = document.getElementById("slots");
 const areaAvaliacao = document.getElementById("avaliacao");
-const seletor = document.getElementById("seletor");
-const buscaTime = document.getElementById("busca-time");
-const resultados = document.getElementById("resultados");
-const contagemSeletor = document.getElementById("contagem-seletor");
 
 let TODOS = [];
 let time = []; // cada item: { pokemon, mega: null ou o número da forma }
 let slotEmEdicao = null;
-
-/* Avisa no seletor se o Pokémon tem mega, outra forma, ou as duas coisas. */
-function etiquetaDeForma(p) {
-  const temMega = p.variantes.some((v) => v.categoria === "mega");
-  const temForma = p.variantes.some((v) => v.categoria === "forma");
-  if (temMega && temForma) return `<span class="tem-mega">mega + formas</span>`;
-  if (temMega) return `<span class="tem-mega">tem mega</span>`;
-  if (temForma) return `<span class="tem-mega">tem forma</span>`;
-  return "";
-}
-
-function etiquetasDeTipo(tipos) {
-  return tipos
-    .map(
-      (t) => `<span class="tipo" style="background:${CORES_TIPO[t]}">${NOMES_TIPO[t]}</span>`
-    )
-    .join("");
-}
 
 /* ------------------------------------------------------ salvar e carregar */
 
@@ -133,17 +112,6 @@ function desenharSlots() {
 
 /* ---------------------------------------------------------- o resultado */
 
-function barraDeNota(rotulo, valor, explicacao) {
-  const cor = valor >= 70 ? "boa" : valor >= 45 ? "media" : "ruim";
-  return `
-    <div class="nota">
-      <span class="nota-rotulo">${rotulo}</span>
-      <span class="nota-valor">${valor}</span>
-      <span class="nota-barra"><i class="${cor}" style="width:${valor}%"></i></span>
-      <span class="nota-explica">${explicacao}</span>
-    </div>`;
-}
-
 function cardDeSugestao(sugestao) {
   const p = sugestao.pokemon;
   const podeAdicionar = time.length < 6;
@@ -236,48 +204,14 @@ function atualizar() {
   salvar();
 }
 
-/* ------------------------------------------------------------- o seletor */
+/* --------------------------------------------------- pôr alguém no time */
 
-function mostrarResultados() {
-  const texto = buscaTime.value.trim().toLowerCase();
-  const jaTem = time.map((m) => m.pokemon.id);
-
-  const achados = TODOS.filter(function (p) {
-    if (jaTem.includes(p.id)) return false;
-    if (!texto) return true;
-    return p.nome.toLowerCase().includes(texto) || String(p.dex).includes(texto);
-  });
-
-  // Mostrar mil resultados de uma vez é lento e inútil: ninguém olha o 800º.
-  const mostrados = achados.slice(0, 60);
-  contagemSeletor.textContent =
-    achados.length > 60
-      ? `${achados.length} encontrados — mostrando os 60 primeiros`
-      : `${achados.length} encontrados`;
-
-  resultados.innerHTML = mostrados
-    .map(
-      (p) => `
-      <button type="button" class="achado r-${p.raridadeId || "nenhuma"}" data-escolher="${p.id}">
-        <img src="${imagemDo(p.dex)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-        <span class="nome">${p.nome}</span>
-        <span class="tipos">${etiquetasDeTipo(p.tipos)}</span>
-        ${etiquetaDeForma(p)}
-      </button>`
-    )
-    .join("");
-}
-
-function abrirSeletor(indice) {
-  slotEmEdicao = indice;
-  buscaTime.value = "";
-  mostrarResultados();
-  seletor.showModal();
-  buscaTime.focus();
-}
-
-function escolher(id) {
-  const pokemon = TODOS.find((p) => p.id === id);
+/*
+  `slotEmEdicao` guarda em qual dos 6 quadrados o usuário clicou. Se ele clicou
+  num que já tinha Pokémon, é troca; se veio pelo botão "Adicionar" de uma
+  sugestão, não há quadrado escolhido e o Pokémon entra no fim da fila.
+*/
+function escolher(pokemon) {
   if (!pokemon) return;
 
   const novo = { pokemon, mega: null };
@@ -288,8 +222,15 @@ function escolher(id) {
     time.push(novo);
   }
 
-  seletor.close();
   atualizar();
+}
+
+function pedirPokemon(indice) {
+  slotEmEdicao = indice;
+  abrirSeletor(
+    time.map((m) => m.pokemon.id),
+    escolher
+  );
 }
 
 /* --------------------------------------------------------------- eventos */
@@ -300,19 +241,17 @@ function escolher(id) {
   ele sumiria junto. Isso se chama delegação de evento.
 */
 document.addEventListener("click", function (evento) {
-  const alvo = evento.target.closest("[data-slot], [data-tirar], [data-adicionar], [data-escolher]");
+  const alvo = evento.target.closest("[data-slot], [data-tirar], [data-adicionar]");
   if (!alvo) return;
 
   if (alvo.dataset.slot !== undefined) {
-    abrirSeletor(Number(alvo.dataset.slot));
+    pedirPokemon(Number(alvo.dataset.slot));
   } else if (alvo.dataset.tirar !== undefined) {
     time.splice(Number(alvo.dataset.tirar), 1);
     atualizar();
-  } else if (alvo.dataset.escolher) {
-    escolher(alvo.dataset.escolher);
   } else if (alvo.dataset.adicionar) {
     slotEmEdicao = null;
-    escolher(alvo.dataset.adicionar);
+    escolher(TODOS.find((p) => p.id === alvo.dataset.adicionar));
   }
 });
 
@@ -325,12 +264,10 @@ document.addEventListener("change", function (evento) {
   atualizar();
 });
 
-document.getElementById("fechar").addEventListener("click", () => seletor.close());
 document.getElementById("limpar").addEventListener("click", function () {
   time = [];
   atualizar();
 });
-buscaTime.addEventListener("input", mostrarResultados);
 
 /* ------------------------------------------------------------- o começo */
 

@@ -28,6 +28,27 @@ function nomeBonito(id) {
     .join(" ");
 }
 
+/* Uma etiqueta colorida por tipo. A cor sai da tabela em js/tipos.js. */
+function etiquetasDeTipo(tipos) {
+  return tipos
+    .map(
+      (t) => `<span class="tipo" style="background:${CORES_TIPO[t]}">${NOMES_TIPO[t]}</span>`
+    )
+    .join("");
+}
+
+/* Uma linha de nota com barra: usada pela página de Builds e pela de Time ideal. */
+function barraDeNota(rotulo, valor, explicacao) {
+  const cor = valor >= 70 ? "boa" : valor >= 45 ? "media" : "ruim";
+  return `
+    <div class="nota">
+      <span class="nota-rotulo">${rotulo}</span>
+      <span class="nota-valor">${valor}</span>
+      <span class="nota-barra"><i class="${cor}" style="width:${valor}%"></i></span>
+      <span class="nota-explica">${explicacao}</span>
+    </div>`;
+}
+
 /*
   Desenha uma receita: a grade 3x3 do craft, ou uma frase quando a receita
   não é de bancada (fornalha, cortador de pedra...).

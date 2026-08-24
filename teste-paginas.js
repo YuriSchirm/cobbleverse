@@ -17,7 +17,14 @@ const pasta = __dirname + "/";
 const PAGINAS = {
   "index.html": ["dados/pokemon.js", "js/tipos.js", "js/dex.js"],
   "pokemon.html": ["dados/pokemon.js", "js/tipos.js", "js/ficha.js"],
-  "builds.html": ["dados/pokemon.js", "js/tipos.js", "js/avaliar.js", "js/builds.js"],
+  "builds.html": ["dados/pokemon.js", "js/tipos.js", "js/seletor.js", "js/avaliar.js", "js/builds.js"],
+  "time-ideal.html": [
+    "dados/pokemon.js",
+    "js/tipos.js",
+    "js/seletor.js",
+    "js/avaliar.js",
+    "js/pagina-time-ideal.js",
+  ],
   "tipos.html": ["js/tipos.js", "js/pagina-tipos.js"],
   "raids.html": ["dados/batalha.js", "js/tipos.js", "js/pagina-raids.js"],
   "treinadores.html": ["dados/batalha.js", "js/pagina-treinadores.js"],

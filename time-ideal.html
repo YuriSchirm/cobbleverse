@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Builds — COBBLEVERSE</title>
+  <title>Time ideal — COBBLEVERSE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -14,16 +14,23 @@
   <header class="topo" id="topo"></header>
 
   <main>
-    <h1>Monte seu time</h1>
-    <p class="contagem">Escolha até 6 Pokémon e o site diz onde o time tem furo.</p>
+    <h1>Time ideal</h1>
+    <p class="contagem">Escolha o Pokémon que você quer usar e o site monta os outros 5 em volta dele.</p>
 
-    <section class="slots" id="slots"></section>
+    <section class="escolha">
+      <div class="slot-favorito" id="favorito"></div>
 
-    <div class="acoes">
-      <button type="button" id="limpar" class="botao-fraco">Limpar time</button>
-    </div>
+      <label>
+        <span>Quem pode entrar no time</span>
+        <select id="dificuldade">
+          <option value="natureza">Só quem nasce na natureza</option>
+          <option value="faceis">Só comuns e incomuns (time fácil de montar)</option>
+          <option value="todos">Qualquer Pokémon, inclusive lendário</option>
+        </select>
+      </label>
+    </section>
 
-    <section id="avaliacao"></section>
+    <section id="resultado"></section>
   </main>
 
   <dialog id="seletor">
@@ -41,6 +48,6 @@
   <script src="js/tipos.js"></script>
   <script src="js/seletor.js"></script>
   <script src="js/avaliar.js"></script>
-  <script src="js/builds.js"></script>
+  <script src="js/pagina-time-ideal.js"></script>
 </body>
 </html>

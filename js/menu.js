@@ -1,7 +1,7 @@
 /*
   O cabeçalho do site, escrito uma vez só.
 
-  Antes cada página tinha a sua cópia do menu. Com 19 páginas isso vira um
+  Antes cada página tinha a sua cópia do menu. Com 21 páginas isso vira um
   problema: adicionar um link significa editar 19 arquivos e torcer pra não
   esquecer nenhum. Aqui o menu mora num lugar só, e toda página chama.
 
@@ -15,6 +15,7 @@ const SECOES = [
     paginas: [
       ["index.html", "Pokédex"],
       ["builds.html", "Builds"],
+      ["time-ideal.html", "Time ideal"],
       ["tipos.html", "Tipos"],
     ],
   },

@@ -1,28 +1,42 @@
 /*
   Visual do site.
 
-  Ideia: você está numa caverna de deepslate (onde ficam os Megasites, entre
-  Y 5 e Y 20). Tudo é pedra fria, e a única cor quente é a da tocha.
-  A raridade usa cor de minério: pedra < cobre < lápis < diamante.
+  Ideia: as cores do próprio Pokémon. O fundo é o azul da logo, com o amarelo
+  dela vazando por cima como um brilho. Em cima disso vêm as duas cores da
+  pokébola: o vermelho e o branco.
+
+  A regra que organiza tudo: O AMARELO É LETRA, O VERMELHO É MANCHA.
+  Isso não é gosto. Vermelho de pokébola sobre azul escuro dá 3,3 de contraste,
+  abaixo dos 4,5 que o olho precisa pra ler texto pequeno; o amarelo dá 9,7.
+  Então o vermelho fica nas áreas (a listra do card, a faixa do topo, as barras)
+  e o amarelo fica no que se lê (link, aba aberta, a nota do time).
 */
 
 :root {
-  --fundo: #171a1f;
-  --pedra: #21262e;
-  --pedra-alta: #2a303a;
-  --borda: #333b46;
-  --texto: #e6e8ec;
-  --texto-fraco: #98a0ac;
-  --tocha: #f2a65a;
-  --perigo: #e5674b;
-  --bom: #6fbf73;
+  /* O campo azul da logo, em quatro profundidades. */
+  --fundo: #0e1546;
+  --painel: #182160;
+  --painel-alto: #232e7c;
+  --borda: #303c92;
 
-  /* A escada de raridade, em cor de minério. */
-  --rar-common: #8a939e;
-  --rar-uncommon: #c97f4a;
-  --rar-rare: #4a8fd4;
-  --rar-ultra-rare: #4adec4;
-  --rar-nenhuma: #5a6270;
+  --texto: #ffffff;
+  --texto-fraco: #a7b0e4;
+
+  --realce: #ffcb05;   /* o amarelo da logo: tudo que é letra de destaque */
+  --vermelho: #d92d0a; /* o vermelho da pokébola: tudo que é área */
+
+  --perigo: #ff6a58;
+  --bom: #55dd8a;
+
+  /*
+    A escada de raridade. Mudou junto com o fundo por necessidade: o azul-lápis
+    que marcava "raro" desaparecia dentro de um fundo azul.
+  */
+  --rar-common: #9aa3c8;
+  --rar-uncommon: #f0a53c;
+  --rar-rare: #56d6f5;
+  --rar-ultra-rare: #ff7ad9;
+  --rar-nenhuma: #8b93d4;
 
   --fonte-titulo: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
   --fonte-texto: "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -33,9 +47,17 @@
 
 * { box-sizing: border-box; }
 
+/*
+  O fundo tem duas camadas empilhadas: por cima, um borrão amarelo largo saindo
+  de fora da tela (o `-180px` joga o centro do círculo pra cima do topo, então
+  só a beirada dele aparece); por baixo, o azul. O amarelo da logo entra como
+  clarão, não como área chapada — chapado ele brigaria com o texto branco.
+*/
 body {
   margin: 0;
-  background: var(--fundo);
+  background:
+    radial-gradient(1200px 620px at 50% -180px, rgba(255, 203, 5, 0.20), transparent 62%),
+    var(--fundo);
   color: var(--texto);
   font-family: var(--fonte-texto);
   font-size: 15px;
@@ -53,7 +75,7 @@ h1 { font-size: 30px; margin: 0 0 4px; }
 a { color: inherit; text-decoration: none; }
 
 :focus-visible {
-  outline: 2px solid var(--tocha);
+  outline: 2px solid var(--realce);
   outline-offset: 2px;
 }
 
@@ -64,8 +86,9 @@ a { color: inherit; text-decoration: none; }
   flex-direction: column;
   gap: 9px;
   padding: 12px 24px;
-  background: var(--pedra);
-  border-bottom: 1px solid var(--borda);
+  background: var(--painel);
+  /* A faixa vermelha embaixo do cabeçalho é o cinto da pokébola. */
+  border-bottom: 3px solid var(--vermelho);
   position: sticky;
   top: 0;
   z-index: 5;
@@ -84,23 +107,45 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 0.07em;
 }
 .aba:hover { color: var(--texto); }
-.aba.ativo { background: var(--pedra-alta); color: var(--tocha); }
+.aba.ativo { background: var(--painel-alto); color: var(--realce); }
 
 .marca {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-family: var(--fonte-titulo);
   font-weight: 800;
   font-size: 17px;
   letter-spacing: 0.02em;
-  /* A veia de tocha na marca: mesma linguagem visual dos cards. */
-  border-left: 4px solid var(--tocha);
-  padding-left: 10px;
 }
-.marca span { color: var(--tocha); }
+.marca span { color: var(--realce); }
+
+/*
+  A pokébola do cabeçalho, desenhada só com CSS — nenhuma imagem.
+
+  São dois desenhos empilhados no mesmo quadradinho:
+    1. o de cima é o botão do meio: um círculo branco com anel escuro em volta,
+       e transparente do anel pra fora, pra deixar ver o de baixo;
+    2. o de baixo são três faixas horizontais — vermelha até a metade, escura
+       de 50% a 58% (o cinto), branca daí pra baixo.
+  O `border-radius: 50%` recorta o quadrado em bola.
+*/
+.marca::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid #0b0e1c;
+  background:
+    radial-gradient(circle at 50% 50%, #ffffff 0 3.5px, #0b0e1c 3.5px 5px, transparent 5px),
+    linear-gradient(#d92d0a 0 50%, #0b0e1c 50% 58%, #ffffff 58% 100%);
+}
 
 .menu { display: flex; gap: 18px; flex-wrap: wrap; }
 .menu a { color: var(--texto-fraco); font-size: 14px; padding: 2px 0; }
 .menu a:hover { color: var(--texto); }
-.menu a.ativo { color: var(--tocha); border-bottom: 2px solid var(--tocha); }
+.menu a.ativo { color: var(--realce); border-bottom: 2px solid var(--realce); }
 
 main { padding: 24px; max-width: 1180px; margin: 0 auto; }
 
@@ -110,7 +155,7 @@ main { padding: 24px; max-width: 1180px; margin: 0 auto; }
 
 input, select {
   padding: 10px 12px;
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   color: var(--texto);
@@ -139,7 +184,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 
 .card {
   position: relative;
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 12px 12px 12px 18px;
@@ -148,7 +193,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
   align-content: start;
 }
 
-/* A VEIA: faixa de minério na lateral. É a assinatura do site. */
+/* A VEIA: a listra colorida na lateral do card. Diz a raridade sem gastar texto. */
 .card::before {
   content: "";
   position: absolute;
@@ -164,7 +209,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 .r-rare { --veia: var(--rar-rare); }
 .r-ultra-rare { --veia: var(--rar-ultra-rare); }
 
-.card:hover { border-color: var(--tocha); background: var(--pedra-alta); }
+.card:hover { border-color: var(--realce); background: var(--painel-alto); }
 
 .card img { width: 80px; height: 80px; image-rendering: pixelated; margin: 2px 0; }
 .card h2 { margin: 0; font-size: 16px; }
@@ -200,7 +245,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 /* ------------------------------------------------------ ficha do Pokémon */
 
 .voltar { display: inline-block; margin-bottom: 18px; color: var(--texto-fraco); font-size: 14px; }
-.voltar:hover { color: var(--tocha); }
+.voltar:hover { color: var(--realce); }
 
 .cabecalho {
   display: flex;
@@ -209,7 +254,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
   flex-wrap: wrap;
   margin-bottom: 22px;
   padding-left: 18px;
-  border-left: 5px solid var(--tocha);
+  border-left: 5px solid var(--vermelho);
 }
 .cabecalho img { width: 150px; height: 150px; image-rendering: pixelated; }
 .cabecalho h1 { margin: 2px 0 8px; font-size: 34px; }
@@ -224,7 +269,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 }
 
 .painel {
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 16px 18px;
@@ -242,12 +287,13 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 .painel h3.perigo { color: var(--perigo); }
 .painel h3.bom { color: var(--bom); }
 .painel p { font-size: 14px; }
-.painel a { color: var(--tocha); text-decoration: underline; text-underline-offset: 2px; }
+.painel a { color: var(--realce); text-decoration: underline; text-underline-offset: 2px; }
 
 .linha-tipos { display: flex; gap: 4px; flex-wrap: wrap; }
 
+/* Fundo levemente puxado pro vermelho, pra o aviso não se perder no azul. */
 .aviso {
-  background: #2e2119;
+  background: #4a1b2e;
   border-left: 3px solid var(--perigo);
   padding: 9px 12px;
   border-radius: var(--canto);
@@ -270,7 +316,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 .stat-nome { color: var(--texto-fraco); }
 .stat-valor { text-align: right; font-family: var(--fonte-dados); }
 .stat-barra { background: var(--fundo); height: 7px; border-radius: 2px; overflow: hidden; }
-.stat-barra i { display: block; height: 100%; background: var(--tocha); }
+.stat-barra i { display: block; height: 100%; background: var(--vermelho); }
 .total { margin: 12px 0 0; color: var(--texto-fraco); font-family: var(--fonte-dados); font-size: 13px; }
 
 .local { border-top: 1px solid var(--borda); padding-top: 12px; margin-top: 12px; }
@@ -285,7 +331,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 }
 .grupos { display: flex; gap: 5px; flex-wrap: wrap; }
 .grupo {
-  background: var(--pedra-alta);
+  background: var(--painel-alto);
   border: 1px solid var(--borda);
   padding: 2px 9px;
   border-radius: 2px;
@@ -295,7 +341,7 @@ input:hover, select:hover { border-color: var(--texto-fraco); }
 .biomas { font-size: 12px; color: var(--texto-fraco); line-height: 1.7; margin: 6px 0 0; }
 
 summary { cursor: pointer; font-size: 13px; color: var(--texto-fraco); margin-top: 8px; }
-summary:hover { color: var(--tocha); }
+summary:hover { color: var(--realce); }
 
 .evo {
   display: flex;
@@ -307,7 +353,7 @@ summary:hover { color: var(--tocha); }
   margin: 10px 0 0;
 }
 .evo a { display: flex; gap: 8px; align-items: center; }
-.evo a:hover { color: var(--tocha); }
+.evo a:hover { color: var(--realce); }
 .evo img { width: 44px; height: 44px; image-rendering: pixelated; }
 .evo span { font-size: 13px; color: var(--texto-fraco); }
 
@@ -337,19 +383,20 @@ th.lateral {
 .celula { border: 1px solid var(--fundo); font-family: var(--fonte-dados); font-weight: 600; color: #14161c; }
 .celula.forte { background: var(--bom); }
 .celula.fraco { background: var(--perigo); }
-.celula.zero { background: #4a4a55; color: var(--texto); }
+.celula.zero { background: #2b3470; color: var(--texto); }
 
 /* ------------------------------------------------------------ pokébolas */
 
-.destaque { border-left: 5px solid var(--tocha); }
+.destaque { border-left: 5px solid var(--vermelho); }
 .lista-bolas { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
 .bola { display: flex; gap: 12px; align-items: flex-start; }
 .bola img { width: 36px; height: 36px; image-rendering: pixelated; flex-shrink: 0; }
 .bola h3 { margin: 0 0 3px; font-size: 15px; color: var(--texto); }
+/* O multiplicador da bola, numa etiqueta vermelha: é a própria pokébola. */
 .efeito {
   font-family: var(--fonte-dados);
-  background: var(--tocha);
-  color: #14161c;
+  background: var(--vermelho);
+  color: #ffffff;
   padding: 1px 7px;
   border-radius: 2px;
   font-size: 12px;
@@ -363,12 +410,12 @@ th.lateral {
 
 .passos { padding-left: 20px; margin: 0; }
 .passos li { margin-bottom: 12px; font-size: 14px; }
-.passos strong { color: var(--tocha); }
+.passos strong { color: var(--realce); }
 
 .lista-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 
 .item-mega {
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 12px;
@@ -376,7 +423,7 @@ th.lateral {
 .item-mega header { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
 .item-mega img { width: 26px; height: 26px; image-rendering: pixelated; }
 .item-mega h3 { margin: 0; font-size: 14px; }
-.para-quem { margin: 0 0 8px; font-size: 13px; color: var(--tocha); }
+.para-quem { margin: 0 0 8px; font-size: 13px; color: var(--realce); }
 
 /* A grade do craft, igual à bancada do jogo. */
 .craft { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
@@ -391,7 +438,7 @@ th.lateral {
   padding: 4px;
   overflow: hidden;
 }
-.slot.cheio { background: var(--pedra-alta); }
+.slot.cheio { background: var(--painel-alto); }
 .slot img {
   width: 100%;
   max-width: 34px;
@@ -434,7 +481,7 @@ th.lateral {
 
 .slot-time {
   position: relative;
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 12px 12px 12px 18px;
@@ -462,7 +509,7 @@ th.lateral {
   color: var(--texto-fraco);
   cursor: pointer;
 }
-.slot-time.vazio:hover { border-color: var(--tocha); color: var(--texto); }
+.slot-time.vazio:hover { border-color: var(--realce); color: var(--texto); }
 .mais { font-size: 26px; font-family: var(--fonte-titulo); }
 
 .slot-time.cheio { display: grid; gap: 5px; justify-items: start; }
@@ -484,15 +531,15 @@ th.lateral {
   padding: 2px 6px;
   border-radius: 2px;
 }
-.tirar:hover { color: var(--perigo); background: var(--pedra-alta); }
+.tirar:hover { color: var(--perigo); background: var(--painel-alto); }
 
 .mega { display: grid; gap: 3px; width: 100%; margin-top: 4px; }
-.mega span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tocha); }
+.mega span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--realce); }
 .mega select { padding: 6px 8px; font-size: 13px; width: 100%; }
 .sem-mega { margin: 4px 0 0; font-size: 11px; color: var(--texto-fraco); }
 
 .botao-fraco {
-  background: var(--pedra-alta);
+  background: var(--painel-alto);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   color: var(--texto);
@@ -501,13 +548,13 @@ th.lateral {
   padding: 6px 12px;
   cursor: pointer;
 }
-.botao-fraco:hover { border-color: var(--tocha); color: var(--tocha); }
+.botao-fraco:hover { border-color: var(--realce); color: var(--realce); }
 .trocar { width: 100%; margin-top: 4px; }
 .acoes { margin-bottom: 22px; }
 
 /* ---- o resultado da avaliação ---- */
 
-.resultado { border-left: 5px solid var(--tocha); margin-bottom: 12px; }
+.resultado { border-left: 5px solid var(--vermelho); margin-bottom: 12px; }
 
 .veredito { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
 .nota-geral {
@@ -515,7 +562,7 @@ th.lateral {
   font-weight: 800;
   font-size: 54px;
   line-height: 1;
-  color: var(--tocha);
+  color: var(--realce);
 }
 .veredito h2 { margin: 0 0 2px; }
 .veredito p { margin: 0; color: var(--texto-fraco); }
@@ -533,7 +580,7 @@ th.lateral {
 .nota-barra { background: var(--fundo); height: 7px; border-radius: 2px; overflow: hidden; }
 .nota-barra i { display: block; height: 100%; }
 .nota-barra i.boa { background: var(--bom); }
-.nota-barra i.media { background: var(--tocha); }
+.nota-barra i.media { background: var(--realce); }
 .nota-barra i.ruim { background: var(--perigo); }
 .nota-explica { grid-column: 3; font-size: 11px; color: var(--texto-fraco); margin-top: -4px; }
 
@@ -554,7 +601,7 @@ th.lateral {
   margin-bottom: 20px;
 }
 .problema.grave { border-left-color: var(--perigo); }
-.problema.atencao { border-left-color: var(--tocha); }
+.problema.atencao { border-left-color: var(--realce); }
 .problema.dica { border-left-color: var(--texto-fraco); }
 .problema h3 { margin: 0 0 4px; font-size: 16px; }
 .problema p { margin: 0 0 6px; }
@@ -577,7 +624,7 @@ th.lateral {
 /* ---- a janela de escolher Pokémon ---- */
 
 #seletor {
-  background: var(--pedra);
+  background: var(--painel);
   color: var(--texto);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
@@ -585,7 +632,7 @@ th.lateral {
   width: min(760px, 92vw);
   max-height: 82vh;
 }
-#seletor::backdrop { background: rgba(10, 12, 15, 0.75); }
+#seletor::backdrop { background: rgba(5, 8, 32, 0.78); }
 
 .seletor-topo { display: flex; gap: 8px; margin-bottom: 8px; }
 .seletor-topo input { flex: 1; }
@@ -621,14 +668,14 @@ th.lateral {
   width: 4px;
   background: var(--veia, var(--rar-nenhuma));
 }
-.achado:hover { border-color: var(--tocha); }
+.achado:hover { border-color: var(--realce); }
 .achado img { width: 56px; height: 56px; image-rendering: pixelated; }
 .achado .nome { font-size: 13px; }
 .tem-mega {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--tocha);
+  color: var(--realce);
 }
 
 @media (max-width: 620px) {
@@ -650,7 +697,7 @@ th.lateral {
   display: flex;
   gap: 9px;
   align-items: center;
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 9px 11px;
@@ -670,7 +717,7 @@ th.lateral {
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 10px 10px 10px 16px;
@@ -683,13 +730,13 @@ th.lateral {
   width: 5px;
   background: var(--veia, var(--rar-nenhuma));
 }
-.raid.tier-1 { --veia: #8a939e; }
-.raid.tier-2 { --veia: #6fbf73; }
-.raid.tier-3 { --veia: #4a8fd4; }
-.raid.tier-4 { --veia: #9b7fe0; }
-.raid.tier-5 { --veia: #f2a65a; }
-.raid.tier-6 { --veia: #e5674b; }
-.raid.tier-7 { --veia: #4adec4; }
+.raid.tier-1 { --veia: #9aa3c8; }
+.raid.tier-2 { --veia: #55dd8a; }
+.raid.tier-3 { --veia: #56d6f5; }
+.raid.tier-4 { --veia: #b08bff; }
+.raid.tier-5 { --veia: #ffcb05; }
+.raid.tier-6 { --veia: #ff6a58; }
+.raid.tier-7 { --veia: #ff7ad9; }
 
 .raid img { width: 56px; height: 56px; image-rendering: pixelated; flex-shrink: 0; }
 .raid-corpo { min-width: 0; }
@@ -700,7 +747,7 @@ th.lateral {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background: var(--pedra-alta);
+  background: var(--painel-alto);
   border: 1px solid var(--borda);
   padding: 2px 7px;
   border-radius: 2px;
@@ -709,7 +756,7 @@ th.lateral {
 /* ---- treinadores ---- */
 
 .treinador {
-  background: var(--pedra);
+  background: var(--painel);
   border: 1px solid var(--borda);
   border-radius: var(--canto);
   padding: 10px 14px;
@@ -723,7 +770,7 @@ th.lateral {
   margin: 0;
   color: var(--texto);
 }
-.treinador summary:hover { color: var(--tocha); }
+.treinador summary:hover { color: var(--realce); }
 .treinador-nome { font-family: var(--fonte-titulo); font-weight: 800; font-size: 15px; }
 
 .time {
@@ -750,4 +797,33 @@ th.lateral {
 @media (max-width: 620px) {
   .topo { padding: 10px 16px; }
   .lista-raids, .grade-itens { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------------------ time ideal */
+
+.escolha {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 16px 0 22px;
+}
+.slot-favorito { flex: 0 0 210px; }
+.escolha label { display: grid; gap: 5px; font-size: 13px; color: var(--texto-fraco); }
+.escolha select { min-width: 280px; }
+
+/* O favorito não é sugestão do site: é a escolha do usuário. A borda amarela
+   é o que separa "o que você mandou" de "o que eu escolhi". */
+.slot-time.favorito { border-color: var(--realce); }
+.etiqueta-favorito {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--realce);
+}
+
+@media (max-width: 620px) {
+  .slot-favorito { flex: 1 1 100%; }
+  .escolha select { min-width: 0; width: 100%; }
 }
